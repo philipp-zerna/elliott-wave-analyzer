@@ -58,7 +58,7 @@
             font-weight: 600;
         }
         
-        /* Controls */
+        /* Controls - nur 2 Dropdowns */
         .controls {
             padding: 0.75rem 1rem;
             display: flex;
@@ -75,7 +75,7 @@
             padding: 0.5rem 0.75rem;
             border-radius: 8px;
             font-size: 0.875rem;
-            min-width: 100px;
+            min-width: 120px;
         }
         
         .analyze-btn {
@@ -128,7 +128,7 @@
         }
         
         #chart {
-            height: 350px;
+            height: 380px;
         }
         
         /* Zielzonen */
@@ -257,7 +257,7 @@
         <div class="coin-name" id="headerCoin">Solana</div>
     </div>
     
-    <!-- Controls -->
+    <!-- Controls - nur Coin und Zeitrahmen -->
     <div class="controls">
         <select id="symbol" onchange="updateCoin()">
             <option value="SOLUSDT" selected>SOL</option>
@@ -269,16 +269,13 @@
             <option value="NEARUSDT">NEAR</option>
             <option value="SUIUSDT">SUI</option>
             <option value="KASUSDT">KAS</option>
+            <option value="RENDERUSDT">RENDER</option>
         </select>
         <select id="timeframe">
             <option value="1h">1H</option>
             <option value="4h">4H</option>
             <option value="1d" selected>1D</option>
             <option value="1w">1W</option>
-        </select>
-        <select id="lookback">
-            <option value="quarter">3M</option>
-            <option value="year" selected>1Y</option>
         </select>
         <button class="analyze-btn" onclick="analyze()">Analysieren</button>
     </div>
@@ -287,7 +284,7 @@
     <div class="chart-wrapper">
         <div class="chart-header">
             <div class="chart-pair" id="chartPair">SOLUSDT</div>
-            <div class="current-price" id="currentPrice">$127.45</div>
+            <div class="current-price" id="currentPrice">-</div>
         </div>
         <div id="chart"></div>
     </div>
@@ -303,8 +300,8 @@
             <div class="zone-content">
                 <div class="target-box">
                     <div class="target-label">Kursbereich</div>
-                    <div class="target-range" id="z1range">$143.00 - $152.00</div>
-                    <div class="target-time" id="z1time">⏱ Erwartet in 2-4 Wochen</div>
+                    <div class="target-range" id="z1range">-</div>
+                    <div class="target-time" id="z1time">-</div>
                 </div>
             </div>
         </div>
@@ -318,8 +315,8 @@
             <div class="zone-content">
                 <div class="target-box" style="border-color: var(--yellow); background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));">
                     <div class="target-label">Kursbereich</div>
-                    <div class="target-range" style="color: var(--yellow);" id="z2range">$135.00 - $141.00</div>
-                    <div class="target-time" id="z2time">⏱ Erwartet in 1-2 Wochen</div>
+                    <div class="target-range" style="color: var(--yellow);" id="z2range">-</div>
+                    <div class="target-time" id="z2time">-</div>
                 </div>
             </div>
         </div>
@@ -334,15 +331,15 @@
                 <div class="trade-grid">
                     <div class="trade-item">
                         <div class="trade-label">Entry</div>
-                        <div class="trade-value entry" id="entryVal">$127.45</div>
+                        <div class="trade-value entry" id="entryVal">-</div>
                     </div>
                     <div class="trade-item">
                         <div class="trade-label">Stop-Loss</div>
-                        <div class="trade-value stop" id="stopVal">$117.25</div>
+                        <div class="trade-value stop" id="stopVal">-</div>
                     </div>
                     <div class="trade-item">
                         <div class="trade-label">Take Profit</div>
-                        <div class="trade-value tp" id="tpVal">$147.50</div>
+                        <div class="trade-value tp" id="tpVal">-</div>
                     </div>
                 </div>
             </div>
@@ -357,8 +354,8 @@
             <div class="zone-content">
                 <div class="target-box" style="border-color: var(--red); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));">
                     <div class="target-label">Invalidierung unter</div>
-                    <div class="target-range" style="color: var(--red);" id="z3limit">$112.00</div>
-                    <div class="target-time">⏱ Trendumkehr wahrscheinlich</div>
+                    <div class="target-range" style="color: var(--red);" id="z3limit">-</div>
+                    <div class="target-time">Trendumkehr wahrscheinlich</div>
                 </div>
             </div>
         </div>
@@ -375,7 +372,8 @@
         const COINS = {
             'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
             'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink', 'AVAXUSDT': 'Avalanche',
-            'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui', 'KASUSDT': 'Kaspa', 'BNBUSDT': 'BNB'
+            'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui', 'KASUSDT': 'Kaspa', 
+            'RENDERUSDT': 'Render'
         };
         
         function updateCoin() {
@@ -384,18 +382,12 @@
             document.getElementById('chartPair').textContent = sym;
         }
         
-        function getCandleCount(period, tf) {
-            if (period === 'quarter') {
-                if (tf === '1h') return 2160;
-                if (tf === '4h') return 540;
-                if (tf === '1d') return 90;
-                if (tf === '1w') return 13;
-            } else {
-                if (tf === '1h') return 8760;
-                if (tf === '4h') return 2190;
-                if (tf === '1d') return 365;
-                if (tf === '1w') return 52;
-            }
+        function getLimit(tf) {
+            // Immer 1 Jahr Daten
+            if (tf === '1h') return 8760;
+            if (tf === '4h') return 2190;
+            if (tf === '1d') return 365;
+            if (tf === '1w') return 52;
             return 365;
         }
         
@@ -417,8 +409,7 @@
         async function analyze() {
             const symbol = document.getElementById('symbol').value;
             const tf = document.getElementById('timeframe').value;
-            const period = document.getElementById('lookback').value;
-            const limit = getCandleCount(period, tf);
+            const limit = getLimit(tf);
             
             try {
                 const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
@@ -450,7 +441,7 @@
                     grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
                     rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
                     timeScale: { borderColor: 'rgba(255,255,255,0.1)', timeVisible: true },
-                    height: 350
+                    height: 380
                 });
                 
                 candleSeries = chart.addCandlestickSeries({
