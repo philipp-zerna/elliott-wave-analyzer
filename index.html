@@ -185,9 +185,20 @@
     
     <div class="controls">
         <select id="symbol" onchange="updateCoin()">
-            <option value="SOLUSDT" selected>SOL</option>
+            <option value="BTCUSDT" selected>Bitcoin (BTC)</option>
+            <option value="ETHUSDT">Ethereum (ETH)</option>
+            <option value="SOLUSDT">Solana (SOL)</option>
+            <option value="BNBUSDT">BNB</option>
+            <option value="XRPUSDT">XRP</option>
+            <option value="LINKUSDT">Chainlink (LINK)</option>
+            <option value="AVAXUSDT">Avalanche (AVAX)</option>
+            <option value="NEARUSDT">NEAR Protocol</option>
+            <option value="SUIUSDT">Sui (SUI)</option>
+            <option value="INJUSDT">Injective (INJ)</option>
+            <option value="RENDERUSDT">Render</option>
+            <option value="TIAUSDT">Celestia</option>
+            <option value="KASUSDT">Kaspa (KAS)</option>
             <option value="BTCUSDT">BTC</option>
-            <option value="ETHUSDT">ETH</option>
         </select>
         <select id="timeframe" onchange="analyze()">
             <option value="4h">4 Stunden</option>
@@ -228,7 +239,10 @@
         let chart = null;
         
         const COINS = {
-            'SOLUSDT': 'Solana', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum'
+            'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
+            'BNBUSDT': 'BNB', 'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink',
+            'AVAXUSDT': 'Avalanche', 'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui',
+            'INJUSDT': 'Injective', 'RENDERUSDT': 'Render', 'TIAUSDT': 'Celestia', 'KASUSDT': 'Kaspa'
         };
         
         function updateCoin() {
