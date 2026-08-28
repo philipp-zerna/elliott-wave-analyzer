@@ -227,6 +227,30 @@
             line-height: 1.6;
         }
         
+        .target-zone {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-left: 3px solid;
+        }
+        
+        .target-zone.primary { border-left-color: var(--success); }
+        .target-zone.secondary { border-left-color: var(--warning); }
+        .target-zone.tertiary { border-left-color: var(--danger); }
+        
+        .target-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .target-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
         .insights-panel {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -355,6 +379,7 @@
                     <option value="INJUSDT">Injective (INJ)</option>
                     <option value="RENDERUSDT">Render</option>
                     <option value="TIAUSDT">Celestia</option>
+                    <option value="KASUSDT">Kaspa (KAS)</option>
                 </select>
             </div>
             <div class="control-group">
@@ -454,6 +479,29 @@
             return 365;
         }
 
+        // Dynamische Dezimalstellen basierend auf Preis
+        function formatPrice(price) {
+            if (price >= 10000) return Math.round(price).toLocaleString('de-DE');
+            if (price >= 1000) return Math.round(price).toLocaleString('de-DE');
+            if (price >= 100) return price.toFixed(2);
+            if (price >= 1) return price.toFixed(3);
+            if (price >= 0.1) return price.toFixed(4);
+            if (price >= 0.01) return price.toFixed(5);
+            return price.toFixed(6);
+        }
+
+        // Zeitfenster basierend auf Zeitrahmen
+        function getTimeWindow(tf, multiplier = 1) {
+            const windows = {
+                '1h': { min: Math.round(2 * multiplier), max: Math.round(6 * multiplier), unit: 'Stunden' },
+                '4h': { min: Math.round(1 * multiplier), max: Math.round(3 * multiplier), unit: 'Tage' },
+                '1d': { min: Math.round(2 * multiplier), max: Math.round(6 * multiplier), unit: 'Wochen' },
+                '1w': { min: Math.round(1 * multiplier), max: Math.round(4 * multiplier), unit: 'Monate' }
+            };
+            const w = windows[tf] || windows['1d'];
+            return `in ${w.min}-${w.max} ${w.unit}`;
+        }
+
         function detectAndMarkWaves(candles, series) {
             const pivots = [];
             const strength = 5;
@@ -503,8 +551,10 @@
                 }));
 
                 const price = candles[candles.length - 1].close;
-                const target = (price * 1.12).toFixed(2);
-                const stop = (price * 0.92).toFixed(2);
+                const target1 = price * 1.15;
+                const target2 = price * 1.08;
+                const target3 = price * 0.85;
+                const stop = price * 0.92;
 
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
@@ -525,52 +575,66 @@
                 const waveCount = detectAndMarkWaves(candles, candleSeries);
                 chart.timeScale().fitContent();
 
+                // Szenario 1: Primär
                 document.getElementById('scenario1').innerHTML = `
-                    <p><strong>Aktuelle Welle:</strong> Welle ${Math.min(waveCount, 5)} (Impuls)</p>
-                    <p><strong>Ziel:</strong> $${target}</p>
-                    <p><strong>Stop:</strong> $${stop}</p>
+                    <p><strong>Struktur:</strong> Welle ${Math.min(waveCount, 5)} (Impuls)</p>
+                    <div class="target-zone primary">
+                        <div class="target-price">Ziel: $${formatPrice(target1)}</div>
+                        <div class="target-time">${getTimeWindow(tf, 1.5)}</div>
+                    </div>
+                    <p><strong>Stop:</strong> $${formatPrice(stop)}</p>
                     <p style="margin-top:0.5rem;color:#10b981;">✓ Struktur intakt</p>
                 `;
 
+                // Szenario 2: Alternativ
                 document.getElementById('scenario2').innerHTML = `
-                    <p><strong>Szenario:</strong> ABC-Korrektur</p>
-                    <p><strong>Ziel:</strong> $${(price*1.05).toFixed(2)}</p>
-                    <p style="margin-top:0.5rem;color:#f59e0b;">⚠ Warte auf Bestätigung</p>
+                    <p><strong>Struktur:</strong> ABC-Korrektur</p>
+                    <div class="target-zone secondary">
+                        <div class="target-price">Ziel: $${formatPrice(target2)}</div>
+                        <div class="target-time">${getTimeWindow(tf, 1)}</div>
+                    </div>
+                    <p style="margin-top:0.5rem;color:#f59e0b;">⚠ Konsolidierungsphase</p>
                 `;
 
+                // Szenario 3: Risiko
                 document.getElementById('scenario3').innerHTML = `
-                    <p><strong>Invalidierung:</strong> Unter $${stop}</p>
-                    <p><strong>Ziel:</strong> $${(price*0.85).toFixed(2)}</p>
-                    <p style="margin-top:0.5rem;color:#ef4444;">✗ Trendbruch</p>
+                    <p><strong>Invalidierung:</strong> Unter $${formatPrice(stop)}</p>
+                    <div class="target-zone tertiary">
+                        <div class="target-price">Ziel: $${formatPrice(target3)}</div>
+                        <div class="target-time">${getTimeWindow(tf, 2)}</div>
+                    </div>
+                    <p style="margin-top:0.5rem;color:#ef4444;">✗ Trendbruch möglich</p>
                 `;
 
+                // Insights
+                const rr = ((target1 - price) / (price - stop)).toFixed(1);
                 document.getElementById('insights').innerHTML = `
                     <div class="insight-item">
                         <div class="insight-icon">🎯</div>
                         <div class="insight-content">
-                            <h4>Kursziel</h4>
-                            <p>$${target} (+${((target/price-1)*100).toFixed(1)}%)</p>
+                            <h4>Zielzone 1</h4>
+                            <p>$${formatPrice(target1)} ${getTimeWindow(tf, 1.5)}</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon">🎯</div>
+                        <div class="insight-content">
+                            <h4>Zielzone 2</h4>
+                            <p>$${formatPrice(target2)} ${getTimeWindow(tf, 1)}</p>
                         </div>
                     </div>
                     <div class="insight-item">
                         <div class="insight-icon">🛡️</div>
                         <div class="insight-content">
                             <h4>Stop-Loss</h4>
-                            <p>$${stop} (-${((1-stop/price)*100).toFixed(1)}%)</p>
+                            <p>$${formatPrice(stop)}</p>
                         </div>
                     </div>
                     <div class="insight-item">
                         <div class="insight-icon">📈</div>
                         <div class="insight-content">
                             <h4>Risiko/Rendite</h4>
-                            <p>1:${((target-price)/(price-stop)).toFixed(1)}</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon">⏱️</div>
-                        <div class="insight-content">
-                            <h4>Zeithorizont</h4>
-                            <p>${tf === '1d' ? '2-4 Wochen' : tf === '4h' ? '5-10 Tage' : tf === '1h' ? '1-3 Tage' : '1-3 Monate'}</p>
+                            <p>1:${rr}</p>
                         </div>
                     </div>
                 `;
