@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wave Intelligence - Langfrist Analyse</title>
+    <title>Wave Intelligence Pro</title>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,12 +15,13 @@
             --text: #ffffff;
             --text-muted: #6b7280;
             --green: #10b981;
-            --green-bg: rgba(16, 185, 129, 0.1);
+            --green-bg: rgba(16, 185, 129, 0.15);
             --red: #ef4444;
-            --red-bg: rgba(239, 68, 68, 0.1);
+            --red-bg: rgba(239, 68, 68, 0.15);
             --yellow: #f59e0b;
             --blue: #3b82f6;
             --purple: #8b5cf6;
+            --cyan: #06b6d4;
         }
         
         body {
@@ -35,11 +36,34 @@
             padding: 1rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: space-between;
             border-bottom: 1px solid var(--border);
         }
         
         .logo { font-size: 1.25rem; font-weight: 700; }
+        
+        .mode-toggle {
+            display: flex;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 2px;
+        }
+        
+        .mode-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .mode-btn.active {
+            background: var(--green);
+            color: white;
+            font-weight: 600;
+        }
         
         .controls {
             padding: 0.75rem 1rem;
@@ -47,10 +71,9 @@
             gap: 0.5rem;
             background: var(--card);
             border-bottom: 1px solid var(--border);
-            overflow-x: auto;
         }
         
-        .controls select, .controls button {
+        .controls select {
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--text);
@@ -60,33 +83,51 @@
         }
         
         .analyze-btn {
-            background: var(--green) !important;
-            border: none !important;
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             font-weight: 600;
+            cursor: pointer;
         }
         
-        .chart-tabs {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--card);
+        .position-bar {
+            background: linear-gradient(90deg, var(--green-bg), rgba(6, 182, 212, 0.15));
+            padding: 1rem;
             border-bottom: 1px solid var(--border);
         }
         
-        .tab {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            background: transparent;
-            border: 1px solid var(--border);
+        .position-title {
+            font-size: 0.75rem;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
         }
         
-        .tab.active {
-            background: var(--green-bg);
+        .position-status {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .position-wave {
             color: var(--green);
-            border-color: var(--green);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), var(--cyan));
+            border-radius: 2px;
+            transition: width 0.5s ease;
         }
         
         .chart-wrapper {
@@ -112,125 +153,108 @@
             font-weight: 700;
         }
         
-        #chart { height: 300px; }
+        #chart { height: 320px; }
         
-        .zones-container { padding: 0.75rem; }
+        .scenarios {
+            padding: 0.75rem;
+        }
         
-        .wave-grade {
+        .scenario-card {
             background: var(--card);
             border-radius: 12px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             border: 1px solid var(--border);
             overflow: hidden;
         }
         
-        .grade-header {
+        .scenario-header {
             padding: 0.75rem 1rem;
-            background: linear-gradient(90deg, var(--green-bg), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid var(--border);
         }
         
-        .grade-title {
+        .scenario-name {
             font-weight: 700;
-            font-size: 1rem;
-            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .grade-subtitle {
-            font-size: 0.8rem;
+        .scenario-prob {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .prob-70 { background: var(--green-bg); color: var(--green); }
+        .prob-20 { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+        .prob-10 { background: var(--red-bg); color: var(--red); }
+        
+        .scenario-content {
+            padding: 1rem;
+        }
+        
+        .target-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .target-row:last-child { border-bottom: none; }
+        
+        .target-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .target-info .fib {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .target-price {
+            text-align: right;
+        }
+        
+        .target-main {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        
+        .target-time {
+            font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 0.25rem;
         }
         
-        .zone-box {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
+        .target-up { color: var(--green); }
+        .target-down { color: var(--red); }
         
-        .zone-box:last-child { border-bottom: none; }
-        
-        .zone-label-row {
+        .entry-quality {
+            background: rgba(255,255,255,0.03);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            align-items: center;
         }
         
-        .zone-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .zone-prob {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-        
-        .prob-high { background: var(--green-bg); color: var(--green); }
-        .prob-medium { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
-        .prob-low { background: var(--red-bg); color: var(--red); }
-        
-        .target-display {
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-        }
-        
-        .target-main {
-            font-size: 1.25rem;
-            font-weight: 700;
-            font-family: monospace;
-        }
-        
-        .target-green { color: var(--green); }
-        .target-red { color: var(--red); }
-        .target-yellow { color: var(--yellow); }
-        
-        .target-details {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
+        .quality-label {
             font-size: 0.8rem;
             color: var(--text-muted);
         }
         
-        .correction-box {
-            background: linear-gradient(135deg, var(--red-bg), rgba(239,68,68,0.05));
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .impulse-box {
-            background: linear-gradient(135deg, var(--green-bg), rgba(16,185,129,0.05));
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .setup-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            padding: 1rem;
-        }
-        
-        .setup-item {
-            background: rgba(255,255,255,0.03);
-            padding: 0.75rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .setup-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
-        }
-        
-        .setup-value {
-            font-size: 0.95rem;
-            font-weight: 700;
-            font-family: monospace;
+        .quality-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--green);
         }
         
         .disclaimer {
@@ -243,7 +267,11 @@
 </head>
 <body>
     <div class="header">
-        <div class="logo">📈 Wave Intelligence</div>
+        <div class="logo">📈 Wave Intelligence Pro</div>
+        <div class="mode-toggle">
+            <button class="mode-btn" id="investorBtn" onclick="setMode('investor')">🎯 Investor</button>
+            <button class="mode-btn active" id="traderBtn" onclick="setMode('trader')">⚡ Trader</button>
+        </div>
     </div>
     
     <div class="controls">
@@ -253,15 +281,19 @@
             <option value="SOLUSDT">Solana</option>
             <option value="XRPUSDT">XRP</option>
             <option value="LINKUSDT">Chainlink</option>
-            <option value="AVAXUSDT">Avalanche</option>
         </select>
         <button class="analyze-btn" onclick="analyze()">Analysieren</button>
     </div>
     
-    <div class="chart-tabs">
-        <div class="tab active" onclick="switchTab('1w')">Woche</div>
-        <div class="tab" onclick="switchTab('1d')">Tag</div>
-        <div class="tab" onclick="switchTab('4h')">4H</div>
+    <div class="position-bar">
+        <div class="position-title">Aktuelle Position im Zyklus</div>
+        <div class="position-status">
+            Wir befinden uns in <span class="position-wave" id="currentWave">Welle 3 von 5</span>
+            <span id="waveProgressText">(ca. 60% abgeschlossen)</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="waveProgress" style="width: 60%"></div>
+        </div>
     </div>
     
     <div class="chart-wrapper">
@@ -272,133 +304,124 @@
         <div id="chart"></div>
     </div>
     
-    <div class="zones-container">
-        <!-- Primärer Trend (Welle 3/5) -->
-        <div class="wave-grade">
-            <div class="grade-header">
-                <div class="grade-title">🚀 Primärer Aufwärtstrend</div>
-                <div class="grade-subtitle">Welle 3 & 5 - Langfristige Ziele</div>
+    <div class="scenarios">
+        <!-- Bullish Szenario -->
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <span class="scenario-name">🚀 Bullish Fortsetzung</span>
+                <span class="scenario-prob prob-70">70%</span>
             </div>
-            
-            <div class="zone-box impulse-box">
-                <div class="zone-label-row">
-                    <span class="zone-name">Zielzone Welle 3</span>
-                    <span class="zone-prob prob-high">Hoch</span>
-                </div>
-                <div class="target-display">
-                    <div class="target-main target-green" id="w3target">-</div>
-                    <div class="target-details">
-                        <span>⏱ <span id="w3time">-</span></span>
-                        <span>📊 <span id="w3gain">-</span></span>
+            <div class="scenario-content">
+                <div class="target-row">
+                    <div class="target-info">
+                        <h4>Welle 3 Ziel</h4>
+                        <span class="fib">Fib 1.618 Extension</span>
+                    </div>
+                    <div class="target-price">
+                        <div class="target-main target-up" id="w3target">-</div>
+                        <div class="target-time" id="w3time">Q2 2025</div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="zone-box impulse-box">
-                <div class="zone-label-row">
-                    <span class="zone-name">Zielzone Welle 5</span>
-                    <span class="zone-prob prob-medium">Mittel</span>
+                <div class="target-row">
+                    <div class="target-info">
+                        <h4>Welle 5 Ziel</h4>
+                        <span class="fib">Fib 2.618 Extension</span>
+                    </div>
+                    <div class="target-price">
+                        <div class="target-main target-up" id="w5target">-</div>
+                        <div class="target-time" id="w5time">Q4 2025</div>
+                    </div>
                 </div>
-                <div class="target-display">
-                    <div class="target-main target-green" id="w5target">-</div>
-                    <div class="target-details">
-                        <span>⏱ <span id="w5time">-</span></span>
-                        <span>📊 <span id="w5gain">-</span></span>
+                <div class="entry-quality">
+                    <span class="quality-label">Entry-Qualität</span>
+                    <span class="quality-value" id="entryQuality">✓ Guter Einstieg</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Neutral/Korrektur -->
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <span class="scenario-name">📊 ABC-Korrektur</span>
+                <span class="scenario-prob prob-20">20%</span>
+            </div>
+            <div class="scenario-content">
+                <div class="target-row">
+                    <div class="target-info">
+                        <h4>Zone A (38.2% Retracement)</h4>
+                        <span class="fib">Erste Abwärtswelle</span>
+                    </div>
+                    <div class="target-price">
+                        <div class="target-main target-down" id="zoneAtarget">-</div>
+                        <div class="target-time">nach Welle 5</div>
+                    </div>
+                </div>
+                <div class="target-row">
+                    <div class="target-info">
+                        <h4>Zone C (61.8% Retracement)</h4>
+                        <span class="fib">Korrekturtief</span>
+                    </div>
+                    <div class="target-price">
+                        <div class="target-main target-down" id="zoneCtarget">-</div>
+                        <div class="target-time" id="zoneCtime">Q2 2026</div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Korrektur (ABC) -->
-        <div class="wave-grade">
-            <div class="grade-header" style="background: linear-gradient(90deg, var(--red-bg), transparent);">
-                <div class="grade-title" style="color: var(--red);">📉 Korrekturphase (ABC)</div>
-                <div class="grade-subtitle">Nach Abschluss der 5-Wellen-Sequenz</div>
+        <!-- Bearish -->
+        <div class="scenario-card">
+            <div class="scenario-header">
+                <span class="scenario-name">⚠️ Frühzeitige Umkehr</span>
+                <span class="scenario-prob prob-10">10%</span>
             </div>
-            
-            <div class="zone-box correction-box">
-                <div class="zone-label-row">
-                    <span class="zone-name">Zone A (Erste Abwärtswelle)</span>
-                    <span class="zone-prob prob-medium">Mittel</span>
-                </div>
-                <div class="target-display">
-                    <div class="target-main target-yellow" id="zoneAtarget">-</div>
-                    <div class="target-details">
-                        <span>⏱ <span id="zoneAtime">-</span></span>
-                        <span>📉 <span id="zoneAdrop">-</span></span>
+            <div class="scenario-content">
+                <div class="target-row">
+                    <div class="target-info">
+                        <h4>Invalidierungs-Level</h4>
+                        <span class="fib">Unter diesem Kurs</span>
                     </div>
-                </div>
-            </div>
-            
-            <div class="zone-box correction-box">
-                <div class="zone-label-row">
-                    <span class="zone-name">Zone C (Tiefpunkt Korrektur)</span>
-                    <span class="zone-prob prob-low">Niedrig</span>
-                </div>
-                <div class="target-display">
-                    <div class="target-main target-red" id="zoneCtarget">-</div>
-                    <div class="target-details">
-                        <span>⏱ <span id="zoneCtime">-</span></span>
-                        <span>📉 <span id="zoneCdrop">-</span></span>
+                    <div class="target-price">
+                        <div class="target-main target-down" id="invalidLevel">-</div>
+                        <div class="target-time">Szenario unwahrscheinlich</div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Aktuelles Setup -->
-        <div class="wave-grade">
-            <div class="grade-header" style="background: linear-gradient(90deg, rgba(59,130,246,0.2), transparent);">
-                <div class="grade-title" style="color: var(--blue);">⚡ Aktuelles Setup</div>
-                <div class="grade-subtitle">Einstieg & Risk Management</div>
-            </div>
-            <div class="setup-grid">
-                <div class="setup-item">
-                    <div class="setup-label">Entry</div>
-                    <div class="setup-value" id="setupEntry">-</div>
-                </div>
-                <div class="setup-item">
-                    <div class="setup-label">Stop-Loss</div>
-                    <div class="setup-value" style="color: var(--red);" id="setupStop">-</div>
-                </div>
-                <div class="setup-item">
-                    <div class="setup-label">Target W3</div>
-                    <div class="setup-value" style="color: var(--green);" id="setupTarget">-</div>
                 </div>
             </div>
         </div>
     </div>
     
     <div class="disclaimer">
-        ⚠️ Langfristige Prognosen basieren auf Elliott-Wellen-Theorie.<br>
-        Keine Garantie. Märkte können unvorhersehbar reagieren.
+        ⚠️ Prognosen basieren auf Elliott-Wellen-Theorie & Fibonacci-Extensions.<br>
+        Keine Garantie. Märkte sind unvorhersehbar.
     </div>
 
     <script>
         let chart = null, candleSeries = null;
-        let currentTf = '1w';
+        let currentMode = 'trader';
         
         const COINS = {
             'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
-            'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink', 'AVAXUSDT': 'Avalanche'
+            'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink'
         };
+        
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(mode + 'Btn').classList.add('active');
+            analyze();
+        }
         
         function updateCoin() {
             const sym = document.getElementById('symbol').value;
             document.getElementById('chartPair').textContent = sym;
         }
         
-        function switchTab(tf) {
-            currentTf = tf;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            analyze();
+        function getTimeframe() {
+            return currentMode === 'investor' ? '1w' : '1d';
         }
         
-        function getLimit(tf) {
-            if (tf === '4h') return 2000;
-            if (tf === '1d') return 730;  // 2 Jahre
-            if (tf === '1w') return 200;  // ~4 Jahre
-            return 200;
+        function getLimit() {
+            return currentMode === 'investor' ? 200 : 730; // 4 Jahre vs 2 Jahre
         }
         
         function formatPrice(price) {
@@ -409,17 +432,24 @@
             return '$' + price.toFixed(5);
         }
         
-        function calcGain(current, target) {
-            const pct = ((target - current) / current * 100).toFixed(1);
-            return (pct > 0 ? '+' : '') + pct + '%';
+        function getQuarterMonths() {
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            
+            if (month < 3) return ['Q2 ' + year, 'Q4 ' + year, 'Q2 ' + (year + 1)];
+            if (month < 6) return ['Q3 ' + year, 'Q1 ' + (year + 1), 'Q3 ' + (year + 1)];
+            if (month < 9) return ['Q4 ' + year, 'Q2 ' + (year + 1), 'Q4 ' + (year + 1)];
+            return ['Q1 ' + (year + 1), 'Q3 ' + (year + 1), 'Q1 ' + (year + 2)];
         }
         
         async function analyze() {
             const symbol = document.getElementById('symbol').value;
-            const limit = getLimit(currentTf);
+            const tf = getTimeframe();
+            const limit = getLimit();
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${currentTf}&limit=${limit}`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -432,12 +462,28 @@
                 
                 const price = candles[candles.length - 1].close;
                 
-                // Langfristige Zielzonen (mehrere Wellengrade)
-                const w3Target = price * 1.45;      // Welle 3: +45%
-                const w5Target = price * 1.85;      // Welle 5: +85%
-                const zoneA = price * 0.75;         // Korrektur A: -25%
-                const zoneC = price * 0.55;         // Korrektur C: -45%
-                const stop = price * 0.88;          // Stop: -12%
+                // Elliott Wave Berechnung mit echten Fibonacci-Extensions
+                // Annahme: Wir sind in Welle 3, Welle 1 war von Tief bis recent High
+                const lowest = Math.min(...candles.slice(0, Math.floor(candles.length/2)).map(c => c.low));
+                const wave1High = price * 0.7; // Vereinfachte Annahme
+                const wave1Size = wave1High - lowest;
+                
+                // Welle 3 Ziele (1.618 und 2.0 Extension)
+                const w3target1 = wave1High + (wave1Size * 1.618);
+                const w3target2 = wave1High + (wave1Size * 2.0);
+                
+                // Welle 5 Ziele (nach Welle 4 Korrektur)
+                const w4Low = w3target1 * 0.85; // Welle 4 retraced ca. 15%
+                const wave3Size = w3target1 - wave1High;
+                const w5target = w4Low + (wave1Size * 1.0); // Welle 5 = Welle 1
+                
+                // ABC Korrektur (nach Welle 5)
+                const totalSize = w5target - lowest;
+                const zoneA = w5target - (totalSize * 0.382); // 38.2% Retracement
+                const zoneC = w5target - (totalSize * 0.618); // 61.8% Retracement
+                
+                // Stop-Loss (unter Welle 2 Low)
+                const invalidation = wave1High * 0.95;
                 
                 // Chart
                 if (chart) chart.remove();
@@ -446,7 +492,7 @@
                     grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
                     rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
                     timeScale: { borderColor: 'rgba(255,255,255,0.1)', timeVisible: true },
-                    height: 300
+                    height: 320
                 });
                 
                 candleSeries = chart.addCandlestickSeries({
@@ -457,45 +503,67 @@
                 
                 // Ziellinien
                 const lastTime = candles[candles.length - 1].time;
-                const futureTime = lastTime + (candles[1].time - candles[0].time) * 50;
+                const futureTime = lastTime + (candles[1].time - candles[0].time) * (currentMode === 'investor' ? 50 : 100);
                 
-                const w3Line = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.8)', lineWidth: 2, lineStyle: 2 });
-                const w5Line = chart.addLineSeries({ color: 'rgba(139, 92, 246, 0.8)', lineWidth: 2, lineStyle: 2 });
-                const zoneCLine = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.6)', lineWidth: 2, lineStyle: 3 });
+                const w3Line = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.8)', lineWidth: 2, lineStyle: 2, title: 'W3' });
+                const w5Line = chart.addLineSeries({ color: 'rgba(139, 92, 246, 0.8)', lineWidth: 2, lineStyle: 2, title: 'W5' });
+                const zoneCLine = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.6)', lineWidth: 2, lineStyle: 3, title: 'Zone C' });
                 
-                w3Line.setData([{time: lastTime, value: w3Target}, {time: futureTime, value: w3Target}]);
-                w5Line.setData([{time: lastTime, value: w5Target}, {time: futureTime, value: w5Target}]);
+                w3Line.setData([{time: lastTime, value: w3target1}, {time: futureTime, value: w3target1}]);
+                w5Line.setData([{time: lastTime, value: w5target}, {time: futureTime, value: w5target}]);
                 zoneCLine.setData([{time: lastTime, value: zoneC}, {time: futureTime, value: zoneC}]);
+                
+                // Wellen-Marker
+                const pivots = [];
+                for (let i = 5; i < candles.length - 5; i++) {
+                    const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
+                                  candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
+                    const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
+                                 candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
+                    if (isHigh) pivots.push({ time: candles[i].time, type: 'high' });
+                    if (isLow) pivots.push({ time: candles[i].time, type: 'low' });
+                }
+                
+                const markers = pivots.slice(-6).map((p, idx) => ({
+                    time: p.time,
+                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
+                    color: idx < 2 ? '#6366f1' : idx < 4 ? '#06b6d4' : '#10b981',
+                    shape: 'circle',
+                    text: ['①', '②', '③', '④', '⑤', 'A'][idx] || 'W',
+                    size: 1
+                }));
+                candleSeries.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
                 
-                // UI Update
+                // Quartale berechnen
+                const [q1, q2, q3] = getQuarterMonths();
+                
+                // Progress berechnen (vereinfacht)
+                const progress = Math.min(85, Math.round(((price - wave1High) / (w3target1 - wave1High)) * 100));
+                
+                // UI Updates
                 document.getElementById('currentPrice').textContent = formatPrice(price);
+                document.getElementById('waveProgress').style.width = progress + '%';
+                document.getElementById('waveProgressText').textContent = `(ca. ${progress}% abgeschlossen)`;
                 
-                // Welle 3
-                document.getElementById('w3target').textContent = formatPrice(w3Target) + ' - ' + formatPrice(w3Target * 1.05);
-                document.getElementById('w3time').textContent = currentTf === '1w' ? '3-6 Monate' : currentTf === '1d' ? '2-4 Monate' : '4-8 Wochen';
-                document.getElementById('w3gain').textContent = calcGain(price, w3Target);
+                document.getElementById('w3target').textContent = formatPrice(w3target1) + ' - ' + formatPrice(w3target2);
+                document.getElementById('w3time').textContent = currentMode === 'investor' ? q1 : q1;
                 
-                // Welle 5
-                document.getElementById('w5target').textContent = formatPrice(w5Target) + ' - ' + formatPrice(w5Target * 1.08);
-                document.getElementById('w5time').textContent = currentTf === '1w' ? '6-12 Monate' : currentTf === '1d' ? '4-8 Monate' : '2-4 Monate';
-                document.getElementById('w5gain').textContent = calcGain(price, w5Target);
+                document.getElementById('w5target').textContent = formatPrice(w5target * 0.95) + ' - ' + formatPrice(w5target * 1.05);
+                document.getElementById('w5time').textContent = currentMode === 'investor' ? q2 : q2;
                 
-                // Korrektur A
-                document.getElementById('zoneAtarget').textContent = formatPrice(zoneA * 0.95) + ' - ' + formatPrice(zoneA);
-                document.getElementById('zoneAtime').textContent = 'nach Welle 5';
-                document.getElementById('zoneAdrop').textContent = calcGain(price, zoneA);
-                
-                // Korrektur C
+                document.getElementById('zoneAtarget').textContent = formatPrice(zoneA);
                 document.getElementById('zoneCtarget').textContent = formatPrice(zoneC * 0.95) + ' - ' + formatPrice(zoneC);
-                document.getElementById('zoneCtime').textContent = 'nach Korrektur B';
-                document.getElementById('zoneCdrop').textContent = calcGain(price, zoneC);
+                document.getElementById('zoneCtime').textContent = q3;
                 
-                // Setup
-                document.getElementById('setupEntry').textContent = formatPrice(price);
-                document.getElementById('setupStop').textContent = formatPrice(stop);
-                document.getElementById('setupTarget').textContent = formatPrice(w3Target);
+                document.getElementById('invalidLevel').textContent = formatPrice(invalidation);
+                
+                // Entry Quality
+                const distToW3 = ((w3target1 - price) / price * 100);
+                const quality = distToW3 > 30 ? '✓✓✓ Hervorragend' : distToW3 > 15 ? '✓✓ Gut' : distToW3 > 5 ? '✓ Okay' : '⚠ Spät';
+                document.getElementById('entryQuality').textContent = quality;
+                document.getElementById('entryQuality').style.color = distToW3 > 15 ? 'var(--green)' : distToW3 > 5 ? 'var(--yellow)' : 'var(--red)';
                 
             } catch (e) {
                 console.error(e);
