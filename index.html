@@ -2,493 +2,403 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wave Intelligence | Advanced Elliott Wave Analytics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wave Intelligence</title>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-primary: #050507;
-            --bg-secondary: #0a0b0f;
-            --bg-card: rgba(15, 16, 22, 0.8);
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-tertiary: #06b6d4;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-        }
-        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        :root {
+            --bg: #0a0e1a;
+            --card: #111827;
+            --border: #1f2937;
+            --text: #ffffff;
+            --text-muted: #6b7280;
+            --green: #10b981;
+            --green-dark: #059669;
+            --green-bg: rgba(16, 185, 129, 0.1);
+            --red: #ef4444;
+            --yellow: #f59e0b;
+        }
+        
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            background-image: 
-                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
         }
         
-        .header {
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
-        }
-        
-        .logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-        }
-        
-        .tagline {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            font-weight: 300;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .control-bar {
+        /* Header */
+        .top-bar {
+            background: var(--card);
+            padding: 1rem;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            flex-wrap: wrap;
             align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
         }
         
-        .control-group {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .control-group label {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
-        }
-        
-        select, button {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        select:hover, select:focus {
-            border-color: var(--accent-primary);
-            outline: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            font-weight: 600;
-            min-width: 160px;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
-        }
-        
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-        }
-        
-        @media (max-width: 1200px) {
-            .main-grid { grid-template-columns: 1fr; }
-        }
-        
-        .chart-container {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            height: 600px;
-        }
-        
-        #chart { height: 100%; }
-        
-        .sidebar {
+        .menu-btn {
+            width: 24px;
+            height: 24px;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 5px;
+            cursor: pointer;
         }
         
-        .zone-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
+        .menu-btn span {
+            height: 2px;
+            background: var(--text);
+            border-radius: 1px;
+        }
+        
+        .coin-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        /* Controls */
+        .controls {
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .controls select {
+            background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.25rem;
-            position: relative;
+            color: var(--text);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            min-width: 100px;
+        }
+        
+        .analyze-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        /* Chart Container */
+        .chart-wrapper {
+            background: var(--card);
+            margin: 0.5rem;
+            border-radius: 12px;
             overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        .chart-header {
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .chart-pair {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .chart-pair::before {
+            content: '◆';
+            color: var(--yellow);
+        }
+        
+        .current-price {
+            background: var(--green-bg);
+            color: var(--green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        #chart {
+            height: 350px;
+        }
+        
+        /* Zielzonen */
+        .zones-container {
+            padding: 0.75rem;
+        }
+        
+        .zone-section {
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
         }
         
         .zone-header {
+            padding: 0.75rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
         }
-        
-        .zone-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-secondary);
-        }
-        
-        .zone-prob {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-        }
-        
-        .zone-prob.high { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .zone-prob.medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        .zone-prob.low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
         
         .zone-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
             font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        .zone-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-high { background: var(--green-bg); color: var(--green); }
+        .badge-medium { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+        .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        
+        .zone-content {
+            padding: 1rem;
+        }
+        
+        .target-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+            border: 2px solid var(--green);
+            border-radius: 12px;
+            padding: 1rem;
             margin-bottom: 0.75rem;
         }
         
-        .zone-range {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            border: 1px solid var(--border);
-        }
-        
-        .zone-price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .zone-price-row:last-child { margin-bottom: 0; }
-        
-        .zone-price-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .zone-price-value {
-            font-size: 1rem;
-            font-weight: 600;
-            font-family: 'Space Grotesk', monospace;
-        }
-        
-        .zone-time {
+        .target-label {
             font-size: 0.75rem;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        
+        .target-range {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--green);
+            font-family: 'SF Mono', monospace;
+        }
+        
+        .target-time {
+            font-size: 0.875rem;
+            color: var(--text-muted);
             margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid var(--border);
-        }
-        
-        .handelszone {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-        
-        .handelszone .zone-title {
-            color: var(--accent-primary);
-        }
-        
-        .insights-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-        
-        .insights-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
         
-        .insights-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(180deg, var(--accent-primary), var(--accent-tertiary));
-            border-radius: 2px;
+        .target-time::before {
+            content: '⏱';
         }
         
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+        /* Handelszone */
+        .trade-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.5rem;
         }
         
-        .metric-row:last-child { border-bottom: none; }
-        
-        .metric-label { color: var(--text-secondary); }
-        .metric-value { font-weight: 600; }
-        .metric-value.positive { color: var(--success); }
-        .metric-value.negative { color: var(--danger); }
-        
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            color: var(--text-muted);
-        }
-        
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .disclaimer {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: rgba(245, 158, 11, 0.05);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: 12px;
+        .trade-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 0.75rem;
             text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+        }
+        
+        .trade-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        
+        .trade-value {
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        
+        .trade-value.entry { color: var(--text); }
+        .trade-value.stop { color: var(--red); }
+        .trade-value.tp { color: var(--green); }
+        
+        /* Disclaimer */
+        .disclaimer {
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">Wave Intelligence</div>
-        <div class="tagline">Advanced Elliott Wave Analytics • Zielzonen & Handelsbereiche</div>
-    </header>
-
-    <div class="container">
-        <div class="control-bar">
-            <div class="control-group">
-                <label>Asset</label>
-                <select id="symbol" onchange="loadAnalysis()">
-                    <option value="BTCUSDT">Bitcoin (BTC)</option>
-                    <option value="ETHUSDT">Ethereum (ETH)</option>
-                    <option value="SOLUSDT" selected>Solana (SOL)</option>
-                    <option value="BNBUSDT">BNB</option>
-                    <option value="XRPUSDT">XRP</option>
-                    <option value="LINKUSDT">Chainlink (LINK)</option>
-                    <option value="AVAXUSDT">Avalanche (AVAX)</option>
-                    <option value="NEARUSDT">NEAR Protocol</option>
-                    <option value="SUIUSDT">Sui (SUI)</option>
-                    <option value="INJUSDT">Injective (INJ)</option>
-                    <option value="RENDERUSDT">Render</option>
-                    <option value="TIAUSDT">Celestia</option>
-                    <option value="KASUSDT">Kaspa (KAS)</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label>Zeitrahmen</label>
-                <select id="timeframe" onchange="loadAnalysis()">
-                    <option value="1h">1 Stunde</option>
-                    <option value="4h">4 Stunden</option>
-                    <option value="1d" selected>1 Tag</option>
-                    <option value="1w">1 Woche</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label>Anzeigezeitraum</label>
-                <select id="lookback">
-                    <option value="quarter">3 Monate</option>
-                    <option value="year" selected>1 Jahr</option>
-                </select>
-            </div>
-            <button class="btn-primary" onclick="loadAnalysis()">Analysieren</button>
+    <!-- Header -->
+    <div class="top-bar">
+        <div class="menu-btn"><span></span><span></span><span></span></div>
+        <div class="coin-name" id="headerCoin">Solana</div>
+    </div>
+    
+    <!-- Controls -->
+    <div class="controls">
+        <select id="symbol" onchange="updateCoin()">
+            <option value="SOLUSDT" selected>SOL</option>
+            <option value="BTCUSDT">BTC</option>
+            <option value="ETHUSDT">ETH</option>
+            <option value="XRPUSDT">XRP</option>
+            <option value="LINKUSDT">LINK</option>
+            <option value="AVAXUSDT">AVAX</option>
+            <option value="NEARUSDT">NEAR</option>
+            <option value="SUIUSDT">SUI</option>
+            <option value="KASUSDT">KAS</option>
+        </select>
+        <select id="timeframe">
+            <option value="1h">1H</option>
+            <option value="4h">4H</option>
+            <option value="1d" selected>1D</option>
+            <option value="1w">1W</option>
+        </select>
+        <select id="lookback">
+            <option value="quarter">3M</option>
+            <option value="year" selected>1Y</option>
+        </select>
+        <button class="analyze-btn" onclick="analyze()">Analysieren</button>
+    </div>
+    
+    <!-- Chart -->
+    <div class="chart-wrapper">
+        <div class="chart-header">
+            <div class="chart-pair" id="chartPair">SOLUSDT</div>
+            <div class="current-price" id="currentPrice">$127.45</div>
         </div>
-
-        <div class="main-grid">
-            <div class="chart-container">
-                <div id="chart"></div>
+        <div id="chart"></div>
+    </div>
+    
+    <!-- Zielzonen -->
+    <div class="zones-container">
+        <!-- Primäre Zone -->
+        <div class="zone-section">
+            <div class="zone-header">
+                <span class="zone-title">🎯 Primäre Zielzone</span>
+                <span class="zone-badge badge-high">Wahrscheinlichkeit: Hoch</span>
             </div>
-
-            <div class="sidebar">
-                <!-- Hochwahrscheinliche Zone -->
-                <div class="zone-card">
-                    <div class="zone-header">
-                        <span class="zone-label">Zielzone 1</span>
-                        <span class="zone-prob high">Hoch ~60%</span>
-                    </div>
-                    <div class="zone-title">Primäre Zielzone</div>
-                    <div class="zone-range" id="zone1">
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Min</span>
-                            <span class="zone-price-value" id="z1min">-</span>
-                        </div>
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Max</span>
-                            <span class="zone-price-value" id="z1max">-</span>
-                        </div>
-                        <div class="zone-time" id="z1time">-</div>
-                    </div>
+            <div class="zone-content">
+                <div class="target-box">
+                    <div class="target-label">Kursbereich</div>
+                    <div class="target-range" id="z1range">$143.00 - $152.00</div>
+                    <div class="target-time" id="z1time">⏱ Erwartet in 2-4 Wochen</div>
                 </div>
-
-                <!-- Mittlere Wahrscheinlichkeit -->
-                <div class="zone-card">
-                    <div class="zone-header">
-                        <span class="zone-label">Zielzone 2</span>
-                        <span class="zone-prob medium">Mittel ~30%</span>
-                    </div>
-                    <div class="zone-title">Alternative Zone</div>
-                    <div class="zone-range" id="zone2">
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Min</span>
-                            <span class="zone-price-value" id="z2min">-</span>
-                        </div>
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Max</span>
-                            <span class="zone-price-value" id="z2max">-</span>
-                        </div>
-                        <div class="zone-time" id="z2time">-</div>
-                    </div>
+            </div>
+        </div>
+        
+        <!-- Alternative Zone -->
+        <div class="zone-section">
+            <div class="zone-header">
+                <span class="zone-title">📊 Alternative Zone</span>
+                <span class="zone-badge badge-medium">Wahrscheinlichkeit: Mittel</span>
+            </div>
+            <div class="zone-content">
+                <div class="target-box" style="border-color: var(--yellow); background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));">
+                    <div class="target-label">Kursbereich</div>
+                    <div class="target-range" style="color: var(--yellow);" id="z2range">$135.00 - $141.00</div>
+                    <div class="target-time" id="z2time">⏱ Erwartet in 1-2 Wochen</div>
                 </div>
-
-                <!-- Handelszone (Entry/Stop/Target) -->
-                <div class="zone-card handelszone">
-                    <div class="zone-header">
-                        <span class="zone-label">Setup</span>
-                        <span class="zone-prob high">Empfohlen</span>
+            </div>
+        </div>
+        
+        <!-- Handelszone -->
+        <div class="zone-section">
+            <div class="zone-header">
+                <span class="zone-title">⚡ Handelszone</span>
+                <span class="zone-badge badge-high">Setup Aktiv</span>
+            </div>
+            <div class="zone-content">
+                <div class="trade-grid">
+                    <div class="trade-item">
+                        <div class="trade-label">Entry</div>
+                        <div class="trade-value entry" id="entryVal">$127.45</div>
                     </div>
-                    <div class="zone-title">Handelszone</div>
-                    <div class="zone-range">
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Entry</span>
-                            <span class="zone-price-value" id="entryPrice">-</span>
-                        </div>
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Stop-Loss</span>
-                            <span class="zone-price-value negative" id="stopPrice">-</span>
-                        </div>
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Take-Profit</span>
-                            <span class="zone-price-value positive" id="tpPrice">-</span>
-                        </div>
+                    <div class="trade-item">
+                        <div class="trade-label">Stop-Loss</div>
+                        <div class="trade-value stop" id="stopVal">$117.25</div>
                     </div>
-                </div>
-
-                <!-- Risiko Zone -->
-                <div class="zone-card">
-                    <div class="zone-header">
-                        <span class="zone-label">Risiko</span>
-                        <span class="zone-prob low">Niedrig ~10%</span>
-                    </div>
-                    <div class="zone-title">Invalidierungszone</div>
-                    <div class="zone-range" id="zone3">
-                        <div class="zone-price-row">
-                            <span class="zone-price-label">Unter</span>
-                            <span class="zone-price-value negative" id="z3limit">-</span>
-                        </div>
-                        <div class="zone-time" id="z3time">Trendumkehr wahrscheinlich</div>
-                    </div>
-                </div>
-
-                <div class="insights-panel">
-                    <div class="insights-title">Trade Metriken</div>
-                    <div class="metric-row">
-                        <span class="metric-label">Risiko/Rendite</span>
-                        <span class="metric-value" id="rrRatio">-</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Erwarteter Gewinn</span>
-                        <span class="metric-value positive" id="expProfit">-</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Max Verlust</span>
-                        <span class="metric-value negative" id="maxLoss">-</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Position Size (1% Risk)</span>
-                        <span class="metric-value" id="posSize">-</span>
+                    <div class="trade-item">
+                        <div class="trade-label">Take Profit</div>
+                        <div class="trade-value tp" id="tpVal">$147.50</div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="disclaimer">
-            ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Bildungszwecken. 
-            Kryptowährungen sind hochspekulativ. Verluste des eingesetzten Kapitals sind möglich.
+        
+        <!-- Risiko Zone -->
+        <div class="zone-section">
+            <div class="zone-header">
+                <span class="zone-title">⚠️ Risiko-Zone</span>
+                <span class="zone-badge badge-low">Wahrscheinlichkeit: Niedrig</span>
+            </div>
+            <div class="zone-content">
+                <div class="target-box" style="border-color: var(--red); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));">
+                    <div class="target-label">Invalidierung unter</div>
+                    <div class="target-range" style="color: var(--red);" id="z3limit">$112.00</div>
+                    <div class="target-time">⏱ Trendumkehr wahrscheinlich</div>
+                </div>
+            </div>
         </div>
+    </div>
+    
+    <div class="disclaimer">
+        ⚠️ Diese Analyse dient ausschließlich zu Bildungszwecken.<br>
+        Keine Anlageberatung. Kryptowährungen sind hochspekulativ.
     </div>
 
     <script>
         let chart = null, candleSeries = null;
-
+        
+        const COINS = {
+            'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
+            'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink', 'AVAXUSDT': 'Avalanche',
+            'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui', 'KASUSDT': 'Kaspa', 'BNBUSDT': 'BNB'
+        };
+        
+        function updateCoin() {
+            const sym = document.getElementById('symbol').value;
+            document.getElementById('headerCoin').textContent = COINS[sym] || sym.replace('USDT','');
+            document.getElementById('chartPair').textContent = sym;
+        }
+        
         function getCandleCount(period, tf) {
-            if (period === "quarter") {
-                if (tf === "1h") return 2160;
-                if (tf === "4h") return 540;
-                if (tf === "1d") return 90;
-                if (tf === "1w") return 13;
+            if (period === 'quarter') {
+                if (tf === '1h') return 2160;
+                if (tf === '4h') return 540;
+                if (tf === '1d') return 90;
+                if (tf === '1w') return 13;
             } else {
-                if (tf === "1h") return 8760;
-                if (tf === "4h") return 2190;
-                if (tf === "1d") return 365;
-                if (tf === "1w") return 52;
+                if (tf === '1h') return 8760;
+                if (tf === '4h') return 2190;
+                if (tf === '1d') return 365;
+                if (tf === '1w') return 52;
             }
             return 365;
         }
-
+        
         function formatPrice(price) {
             if (price >= 10000) return Math.round(price).toLocaleString('de-DE');
             if (price >= 1000) return Math.round(price).toLocaleString('de-DE');
@@ -498,46 +408,20 @@
             if (price >= 0.01) return price.toFixed(5);
             return price.toFixed(6);
         }
-
-        function getTimeWindow(tf, multiplier = 1) {
-            const windows = {
-                '1h': { min: Math.round(2 * multiplier), max: Math.round(6 * multiplier), unit: 'Stunden' },
-                '4h': { min: Math.round(1 * multiplier), max: Math.round(3 * multiplier), unit: 'Tage' },
-                '1d': { min: Math.round(2 * multiplier), max: Math.round(6 * multiplier), unit: 'Wochen' },
-                '1w': { min: Math.round(1 * multiplier), max: Math.round(4 * multiplier), unit: 'Monate' }
-            };
-            const w = windows[tf] || windows['1d'];
-            return `${w.min}-${w.max} ${w.unit}`;
+        
+        function getTimeWindow(tf) {
+            const map = {'1h': '2-6 Stunden', '4h': '1-3 Tage', '1d': '2-4 Wochen', '1w': '1-3 Monate'};
+            return map[tf] || '2-4 Wochen';
         }
-
-        function detectWaves(candles) {
-            const pivots = [];
-            const strength = 5;
-            
-            for (let i = strength; i < candles.length - strength; i++) {
-                const isHigh = candles.slice(i-strength, i).every(d => d.high <= candles[i].high) &&
-                              candles.slice(i+1, i+strength+1).every(d => d.high < candles[i].high);
-                const isLow = candles.slice(i-strength, i).every(d => d.low >= candles[i].low) &&
-                             candles.slice(i+1, i+strength+1).every(d => d.low > candles[i].low);
-                
-                if (isHigh) pivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
-                if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
-            }
-            
-            return pivots.slice(-6);
-        }
-
-        async function loadAnalysis() {
+        
+        async function analyze() {
             const symbol = document.getElementById('symbol').value;
             const tf = document.getElementById('timeframe').value;
             const period = document.getElementById('lookback').value;
-            const lb = getCandleCount(period, tf);
-
-            // Loading state
-            document.getElementById('z1min').textContent = '...';
+            const limit = getCandleCount(period, tf);
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${lb}`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -547,95 +431,86 @@
                     low: parseFloat(c[3]),
                     close: parseFloat(c[4])
                 }));
-
-                const price = candles[candles.length - 1].close;
-                const avgRange = candles.slice(-20).reduce((a, c) => a + (c.high - c.low), 0) / 20;
                 
-                // Zielzonen mit Bandbreite
+                const price = candles[candles.length - 1].close;
+                
+                // Zielzonen berechnen
                 const z1min = price * 1.12;
-                const z1max = price * 1.18;
-                const z2min = price * 1.05;
-                const z2max = price * 1.10;
-                const stopLevel = price * 0.92;
+                const z1max = price * 1.19;
+                const z2min = price * 1.06;
+                const z2max = price * 1.11;
+                const stop = price * 0.92;
                 const invalidation = price * 0.88;
-
+                const tp = (z1min + z1max) / 2;
+                
+                // Chart
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
-                    layout: { background: { color: 'transparent' }, textColor: '#94a3b8' },
-                    grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
-                    rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
-                    timeScale: { borderColor: 'rgba(255,255,255,0.08)', timeVisible: true },
-                    height: 550
+                    layout: { background: { color: '#111827' }, textColor: '#9ca3af' },
+                    grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+                    rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+                    timeScale: { borderColor: 'rgba(255,255,255,0.1)', timeVisible: true },
+                    height: 350
                 });
-
+                
                 candleSeries = chart.addCandlestickSeries({
                     upColor: '#10b981', downColor: '#ef4444',
-                    borderUpColor: '#10b981', borderDownColor: '#ef4444',
-                    wickUpColor: '#10b981', wickDownColor: '#ef4444'
+                    borderUpColor: '#10b981', borderDownColor: '#ef4444'
                 });
                 candleSeries.setData(candles);
                 
-                // Zielzonen als horizontale Linien
-                const line1max = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.5)', lineWidth: 2, lineStyle: 2 });
-                const line1min = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.3)', lineWidth: 1, lineStyle: 2 });
-                const line2 = chart.addLineSeries({ color: 'rgba(245, 158, 11, 0.4)', lineWidth: 1, lineStyle: 2 });
-                const lineStop = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.5)', lineWidth: 2 });
+                // Zielzonen als Linien
+                const z1minLine = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.6)', lineWidth: 2, lineStyle: 2 });
+                const z1maxLine = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.8)', lineWidth: 2 });
+                const stopLine = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.6)', lineWidth: 2, lineStyle: 2 });
                 
                 const lastTime = candles[candles.length - 1].time;
-                const futureTime = lastTime + (candles[1].time - candles[0].time) * 10;
+                const futureTime = lastTime + (candles[1].time - candles[0].time) * 15;
                 
-                line1max.setData([{time: lastTime, value: z1max}, {time: futureTime, value: z1max}]);
-                line1min.setData([{time: lastTime, value: z1min}, {time: futureTime, value: z1min}]);
-                line2.setData([{time: lastTime, value: (z2min+z2max)/2}, {time: futureTime, value: (z2min+z2max)/2}]);
-                lineStop.setData([{time: lastTime, value: stopLevel}, {time: futureTime, value: stopLevel}]);
+                z1minLine.setData([{time: lastTime, value: z1min}, {time: futureTime, value: z1min}]);
+                z1maxLine.setData([{time: lastTime, value: z1max}, {time: futureTime, value: z1max}]);
+                stopLine.setData([{time: lastTime, value: stop}, {time: futureTime, value: stop}]);
                 
-                // Wellen-Marker
-                const waves = detectWaves(candles);
-                const markers = waves.map((p, idx) => ({
+                // Wellen
+                const pivots = [];
+                for (let i = 5; i < candles.length - 5; i++) {
+                    const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
+                                  candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
+                    const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
+                                 candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
+                    if (isHigh) pivots.push({ time: candles[i].time, type: 'high' });
+                    if (isLow) pivots.push({ time: candles[i].time, type: 'low' });
+                }
+                
+                const markers = pivots.slice(-5).map((p, idx) => ({
                     time: p.time,
                     position: p.type === 'high' ? 'aboveBar' : 'belowBar',
                     color: idx % 2 === 0 ? '#6366f1' : '#06b6d4',
                     shape: 'circle',
-                    text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)', '(a)'][idx] || 'W' + idx,
-                    size: 1.5
+                    text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)'][idx],
+                    size: 1
                 }));
                 candleSeries.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
-
-                // UI Updates
-                document.getElementById('z1min').textContent = '$' + formatPrice(z1min);
-                document.getElementById('z1max').textContent = '$' + formatPrice(z1max);
-                document.getElementById('z1time').textContent = '⏱️ ' + getTimeWindow(tf, 1.5);
                 
-                document.getElementById('z2min').textContent = '$' + formatPrice(z2min);
-                document.getElementById('z2max').textContent = '$' + formatPrice(z2max);
-                document.getElementById('z2time').textContent = '⏱️ ' + getTimeWindow(tf, 1);
-                
-                document.getElementById('entryPrice').textContent = '$' + formatPrice(price);
-                document.getElementById('stopPrice').textContent = '$' + formatPrice(stopLevel);
-                document.getElementById('tpPrice').textContent = '$' + formatPrice((z1min+z1max)/2);
-                
+                // UI Update
+                document.getElementById('currentPrice').textContent = '$' + formatPrice(price);
+                document.getElementById('z1range').textContent = '$' + formatPrice(z1min) + ' - $' + formatPrice(z1max);
+                document.getElementById('z1time').textContent = '⏱ Erwartet ' + getTimeWindow(tf);
+                document.getElementById('z2range').textContent = '$' + formatPrice(z2min) + ' - $' + formatPrice(z2max);
+                document.getElementById('z2time').textContent = '⏱ Erwartet ' + getTimeWindow(tf).replace('4', '2').replace('6', '3');
+                document.getElementById('entryVal').textContent = '$' + formatPrice(price);
+                document.getElementById('stopVal').textContent = '$' + formatPrice(stop);
+                document.getElementById('tpVal').textContent = '$' + formatPrice(tp);
                 document.getElementById('z3limit').textContent = '$' + formatPrice(invalidation);
                 
-                // Metriken
-                const risk = price - stopLevel;
-                const reward = ((z1min + z1max) / 2) - price;
-                const rr = (reward / risk).toFixed(1);
-                const profitPct = ((reward / price) * 100).toFixed(1);
-                const lossPct = ((risk / price) * 100).toFixed(1);
-                
-                document.getElementById('rrRatio').textContent = '1:' + rr;
-                document.getElementById('expProfit').textContent = '+' + profitPct + '%';
-                document.getElementById('maxLoss').textContent = '-' + lossPct + '%';
-                document.getElementById('posSize').textContent = '$' + Math.round(100 / (lossPct/100)).toLocaleString('de-DE');
-
             } catch (e) {
                 console.error(e);
             }
         }
-
-        window.onload = loadAnalysis;
+        
+        window.onload = analyze;
     </script>
 </body>
 </html>
