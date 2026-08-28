@@ -234,10 +234,11 @@
             <option value="XRPUSDT">XRP</option>
             <option value="LINKUSDT">LINK</option>
         </select>
-        <select id="timeframe">
-            <option value="1d" selected>1D</option>
-            <option value="4h">4H</option>
-            <option value="1w">1W</option>
+        <select id="timeframe" onchange="analyze()">
+            <option value="1h">1H (1 Monat)</option>
+            <option value="4h" selected>4H (4 Monate)</option>
+            <option value="1d">1D (1 Jahr)</option>
+            <option value="1w">1W (2 Jahre)</option>
         </select>
         <button class="analyze-btn" onclick="analyze()">Analysieren</button>
     </div>
@@ -251,7 +252,6 @@
     </div>
     
     <div class="zones-container">
-        <!-- Primäre Zone -->
         <div class="zone-card">
             <div class="zone-header">
                 <span class="zone-title">🎯 Primäre Zielzone</span>
@@ -266,7 +266,6 @@
             </div>
         </div>
         
-        <!-- Alternative Zone -->
         <div class="zone-card">
             <div class="zone-header">
                 <span class="zone-title">📊 Alternative Zone</span>
@@ -281,7 +280,6 @@
             </div>
         </div>
         
-        <!-- Handelszone -->
         <div class="zone-card">
             <div class="zone-header">
                 <span class="zone-title">⚡ Handelszone</span>
@@ -333,13 +331,54 @@
             return '$' + price.toFixed(5);
         }
         
+        function getTimeConfig(tf) {
+            // Korrekte Limits für sichtbare Zeitachse
+            const configs = {
+                '1h': { 
+                    limit: 720,  // 1 Monat = 30 Tage * 24 Stunden
+                    label: '1H (30 Tage)',
+                    timeFormatter: (time) => {
+                        const date = new Date(time * 1000);
+                        return date.getDate() + '.';
+                    }
+                },
+                '4h': { 
+                    limit: 480,  // 4 Monate = 120 Tage * 6 (4h pro Tag)
+                    label: '4H (4 Monate)',
+                    timeFormatter: (time) => {
+                        const date = new Date(time * 1000);
+                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                        return months[date.getMonth()];
+                    }
+                },
+                '1d': { 
+                    limit: 365,  // 1 Jahr
+                    label: '1D (1 Jahr)',
+                    timeFormatter: (time) => {
+                        const date = new Date(time * 1000);
+                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                        return months[date.getMonth()];
+                    }
+                },
+                '1w': { 
+                    limit: 104,  // 2 Jahre
+                    label: '1W (2 Jahre)',
+                    timeFormatter: (time) => {
+                        const date = new Date(time * 1000);
+                        return date.getFullYear().toString().substr(2);
+                    }
+                }
+            };
+            return configs[tf] || configs['1d'];
+        }
+        
         async function analyze() {
             const symbol = document.getElementById('symbol').value;
             const tf = document.getElementById('timeframe').value;
-            const limit = tf === '1w' ? 200 : tf === '1d' ? 730 : 2000;
+            const config = getTimeConfig(tf);
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${config.limit}`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -360,7 +399,37 @@
                 const stop = price * 0.92;
                 const tp = (z1min + z1max) / 2;
                 
-                // Chart mit korrekter Zeitachse
+                // Zeitachsen-Beschriftung je nach Timeframe
+                let tickFormatter;
+                if (tf === '1h') {
+                    // Bei 1H: Tage anzeigen (1., 5., 10. etc.)
+                    tickFormatter = (time) => {
+                        const date = new Date(time * 1000);
+                        return date.getDate() + '.';
+                    };
+                } else if (tf === '4h') {
+                    // Bei 4H: Monate anzeigen
+                    tickFormatter = (time) => {
+                        const date = new Date(time * 1000);
+                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                        return months[date.getMonth()];
+                    };
+                } else if (tf === '1d') {
+                    // Bei 1D: Monate anzeigen
+                    tickFormatter = (time) => {
+                        const date = new Date(time * 1000);
+                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                        return months[date.getMonth()];
+                    };
+                } else {
+                    // Bei 1W: Jahre anzeigen
+                    tickFormatter = (time) => {
+                        const date = new Date(time * 1000);
+                        return date.getFullYear().toString();
+                    };
+                }
+                
+                // Chart
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
                     layout: { 
@@ -378,12 +447,9 @@
                     },
                     timeScale: { 
                         borderColor: '#30363d',
-                        timeVisible: true,
-                        tickMarkFormatter: (time) => {
-                            const date = new Date(time * 1000);
-                            const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                            return months[date.getMonth()];
-                        }
+                        timeVisible: tf === '1h' || tf === '4h',
+                        tickMarkFormatter: tickFormatter,
+                        barSpacing: tf === '1h' ? 3 : tf === '4h' ? 6 : 8
                     },
                     height: 280,
                     crosshair: { mode: 0 }
@@ -399,35 +465,30 @@
                 });
                 candleSeries.setData(candles);
                 
-                // DURCHGEZOGENE GELBE LINIE = Wahrscheinlichster Fall (Primärszenario)
+                // Prognoselinien
+                const lastTime = candles[candles.length - 1].time;
+                const timeStep = candles[1].time - candles[0].time;
+                const futureSteps = tf === '1h' ? 48 : tf === '4h' ? 30 : tf === '1d' ? 30 : 12;
+                
                 const primaryLine = chart.addLineSeries({ 
                     color: '#f0883e', 
                     lineWidth: 2,
-                    lineStyle: 0, // Durchgezogen
-                    lastValueVisible: false,
-                    title: 'Primär'
+                    lineStyle: 0,
+                    lastValueVisible: false
                 });
                 
-                // GESTRICHELTE GRÜNE LINIE = Zweitwahrscheinlichster Fall
                 const secondaryLine = chart.addLineSeries({ 
                     color: '#3fb950', 
                     lineWidth: 2,
-                    lineStyle: 2, // Gestrichelt
-                    lastValueVisible: false,
-                    title: 'Alternativ'
+                    lineStyle: 2,
+                    lastValueVisible: false
                 });
-                
-                // Linien in die Zukunft zeichnen
-                const lastTime = candles[candles.length - 1].time;
-                const timeStep = candles[1].time - candles[0].time;
-                const futureSteps = tf === '1d' ? 60 : tf === '4h' ? 40 : 12;
                 
                 const primaryData = [];
                 const secondaryData = [];
                 
                 for (let i = 0; i <= futureSteps; i++) {
                     const t = lastTime + (timeStep * i);
-                    // Gelbe Linie steigt zum Ziel
                     const progress = i / futureSteps;
                     const p1 = price + (z1min - price) * progress;
                     const p2 = price + (z2min - price) * progress;
@@ -438,15 +499,17 @@
                 primaryLine.setData(primaryData);
                 secondaryLine.setData(secondaryData);
                 
-                // Horizontale Zielzonen-Linien
+                // Horizontale Ziellinien
                 const z1Line = chart.addLineSeries({ 
-                    color: 'rgba(35, 134, 54, 0.6)', 
+                    color: 'rgba(35, 134, 54, 0.5)', 
                     lineWidth: 1,
                     lineStyle: 2,
-                    lastValueVisible: true,
-                    title: 'Z1'
+                    lastValueVisible: true
                 });
-                z1Line.setData([{time: lastTime, value: z1min}, {time: lastTime + timeStep * futureSteps, value: z1min}]);
+                z1Line.setData([
+                    {time: lastTime, value: z1min}, 
+                    {time: lastTime + timeStep * futureSteps, value: z1min}
+                ]);
                 
                 // Wellen-Marker
                 const pivots = [];
@@ -474,9 +537,9 @@
                 // UI
                 document.getElementById('currentPrice').textContent = formatPrice(price);
                 document.getElementById('z1range').textContent = formatPrice(z1min) + ' - ' + formatPrice(z1max);
-                document.getElementById('z1time').textContent = '⏱ Erwartet in 2-4 Wochen';
+                document.getElementById('z1time').textContent = '⏱ Erwartet ' + (tf === '1h' ? 'in 6-12 Stunden' : tf === '4h' ? 'in 2-3 Wochen' : tf === '1d' ? 'in 2-4 Wochen' : 'in 3-6 Monaten');
                 document.getElementById('z2range').textContent = formatPrice(z2min) + ' - ' + formatPrice(z2max);
-                document.getElementById('z2time').textContent = '⏱ Erwartet in 1-2 Wochen';
+                document.getElementById('z2time').textContent = '⏱ Erwartet ' + (tf === '1h' ? 'in 2-6 Stunden' : tf === '4h' ? 'in 1-2 Wochen' : tf === '1d' ? 'in 1-2 Wochen' : 'in 1-3 Monaten');
                 document.getElementById('entryVal').textContent = formatPrice(price);
                 document.getElementById('stopVal').textContent = formatPrice(stop);
                 document.getElementById('tpVal').textContent = formatPrice(tp);
