@@ -126,7 +126,7 @@
         
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 400px;
             gap: 2rem;
         }
         
@@ -140,7 +140,7 @@
             border: 1px solid var(--border);
             border-radius: 20px;
             padding: 1.5rem;
-            height: 550px;
+            height: 600px;
         }
         
         #chart { height: 100%; }
@@ -148,107 +148,94 @@
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1rem;
         }
         
-        .scenario-card {
+        .zone-card {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
         }
         
-        .scenario-card:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-        
-        .scenario-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-        }
-        
-        .scenario-card.primary::before {
-            background: linear-gradient(90deg, var(--success), #34d399);
-        }
-        
-        .scenario-card.secondary::before {
-            background: linear-gradient(90deg, var(--warning), #fbbf24);
-        }
-        
-        .scenario-card.tertiary::before {
-            background: linear-gradient(90deg, var(--danger), #f87171);
-        }
-        
-        .scenario-header {
+        .zone-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         
-        .scenario-label {
-            font-size: 0.75rem;
+        .zone-label {
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-secondary);
         }
         
-        .scenario-prob {
-            font-size: 0.875rem;
+        .zone-prob {
+            font-size: 0.8rem;
             font-weight: 600;
-            padding: 0.25rem 0.75rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.05);
         }
         
-        .scenario-card.primary .scenario-prob { color: var(--success); }
-        .scenario-card.secondary .scenario-prob { color: var(--warning); }
-        .scenario-card.tertiary .scenario-prob { color: var(--danger); }
+        .zone-prob.high { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .zone-prob.medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .zone-prob.low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
         
-        .scenario-title {
+        .zone-title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .zone-range {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border);
+        }
+        
+        .zone-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 0.5rem;
         }
         
-        .scenario-content {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
+        .zone-price-row:last-child { margin-bottom: 0; }
         
-        .target-zone {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border-left: 3px solid;
-        }
-        
-        .target-zone.primary { border-left-color: var(--success); }
-        .target-zone.secondary { border-left-color: var(--warning); }
-        .target-zone.tertiary { border-left-color: var(--danger); }
-        
-        .target-price {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .target-time {
+        .zone-price-label {
             font-size: 0.8rem;
             color: var(--text-muted);
-            margin-top: 0.25rem;
+        }
+        
+        .zone-price-value {
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Space Grotesk', monospace;
+        }
+        
+        .zone-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .handelszone {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .handelszone .zone-title {
+            color: var(--accent-primary);
         }
         
         .insights-panel {
@@ -256,15 +243,15 @@
             backdrop-filter: blur(20px);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 2rem;
-            margin-top: 2rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
         
         .insights-title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -273,55 +260,25 @@
         .insights-title::before {
             content: '';
             width: 4px;
-            height: 20px;
+            height: 16px;
             background: linear-gradient(180deg, var(--accent-primary), var(--accent-tertiary));
             border-radius: 2px;
         }
         
-        .insight-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-        }
-        
-        .insight-item {
+        .metric-row {
             display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
         }
         
-        .insight-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(255, 255, 255, 0.12);
-        }
+        .metric-row:last-child { border-bottom: none; }
         
-        .insight-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            flex-shrink: 0;
-        }
-        
-        .insight-content h4 {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .insight-content p {
-            font-size: 1rem;
-            font-weight: 500;
-        }
+        .metric-label { color: var(--text-secondary); }
+        .metric-value { font-weight: 600; }
+        .metric-value.positive { color: var(--success); }
+        .metric-value.negative { color: var(--danger); }
         
         .loading {
             display: flex;
@@ -359,7 +316,7 @@
 <body>
     <header class="header">
         <div class="logo">Wave Intelligence</div>
-        <div class="tagline">Advanced Elliott Wave Analytics • AI-Powered Market Intelligence</div>
+        <div class="tagline">Advanced Elliott Wave Analytics • Zielzonen & Handelsbereiche</div>
     </header>
 
     <div class="container">
@@ -369,7 +326,7 @@
                 <select id="symbol" onchange="loadAnalysis()">
                     <option value="BTCUSDT">Bitcoin (BTC)</option>
                     <option value="ETHUSDT">Ethereum (ETH)</option>
-                    <option value="SOLUSDT">Solana (SOL)</option>
+                    <option value="SOLUSDT" selected>Solana (SOL)</option>
                     <option value="BNBUSDT">BNB</option>
                     <option value="XRPUSDT">XRP</option>
                     <option value="LINKUSDT">Chainlink (LINK)</option>
@@ -407,49 +364,102 @@
             </div>
 
             <div class="sidebar">
-                <div class="scenario-card primary">
-                    <div class="scenario-header">
-                        <span class="scenario-label">Primärszenario</span>
-                        <span class="scenario-prob">~60%</span>
+                <!-- Hochwahrscheinliche Zone -->
+                <div class="zone-card">
+                    <div class="zone-header">
+                        <span class="zone-label">Zielzone 1</span>
+                        <span class="zone-prob high">Hoch ~60%</span>
                     </div>
-                    <div class="scenario-title">Bullische Fortsetzung</div>
-                    <div class="scenario-content" id="scenario1">
-                        <div class="loading"><div class="spinner"></div></div>
-                    </div>
-                </div>
-
-                <div class="scenario-card secondary">
-                    <div class="scenario-header">
-                        <span class="scenario-label">Alternativ</span>
-                        <span class="scenario-prob">~30%</span>
-                    </div>
-                    <div class="scenario-title">Konsolidierung</div>
-                    <div class="scenario-content" id="scenario2">
-                        Seitwärtsphase vor nächstem Ausbruch
+                    <div class="zone-title">Primäre Zielzone</div>
+                    <div class="zone-range" id="zone1">
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Min</span>
+                            <span class="zone-price-value" id="z1min">-</span>
+                        </div>
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Max</span>
+                            <span class="zone-price-value" id="z1max">-</span>
+                        </div>
+                        <div class="zone-time" id="z1time">-</div>
                     </div>
                 </div>
 
-                <div class="scenario-card tertiary">
-                    <div class="scenario-header">
-                        <span class="scenario-label">Risiko</span>
-                        <span class="scenario-prob">~10%</span>
+                <!-- Mittlere Wahrscheinlichkeit -->
+                <div class="zone-card">
+                    <div class="zone-header">
+                        <span class="zone-label">Zielzone 2</span>
+                        <span class="zone-prob medium">Mittel ~30%</span>
                     </div>
-                    <div class="scenario-title">Trendumkehr</div>
-                    <div class="scenario-content" id="scenario3">
-                        Invalidierung der aktuellen Struktur
+                    <div class="zone-title">Alternative Zone</div>
+                    <div class="zone-range" id="zone2">
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Min</span>
+                            <span class="zone-price-value" id="z2min">-</span>
+                        </div>
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Max</span>
+                            <span class="zone-price-value" id="z2max">-</span>
+                        </div>
+                        <div class="zone-time" id="z2time">-</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="insights-panel">
-            <div class="insights-title">Strategische Insights</div>
-            <div class="insight-grid" id="insights">
-                <div class="insight-item">
-                    <div class="insight-icon">📊</div>
-                    <div class="insight-content">
-                        <h4>Elliott Wave Muster</h4>
-                        <p>Warte auf Analyse...</p>
+                <!-- Handelszone (Entry/Stop/Target) -->
+                <div class="zone-card handelszone">
+                    <div class="zone-header">
+                        <span class="zone-label">Setup</span>
+                        <span class="zone-prob high">Empfohlen</span>
+                    </div>
+                    <div class="zone-title">Handelszone</div>
+                    <div class="zone-range">
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Entry</span>
+                            <span class="zone-price-value" id="entryPrice">-</span>
+                        </div>
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Stop-Loss</span>
+                            <span class="zone-price-value negative" id="stopPrice">-</span>
+                        </div>
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Take-Profit</span>
+                            <span class="zone-price-value positive" id="tpPrice">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risiko Zone -->
+                <div class="zone-card">
+                    <div class="zone-header">
+                        <span class="zone-label">Risiko</span>
+                        <span class="zone-prob low">Niedrig ~10%</span>
+                    </div>
+                    <div class="zone-title">Invalidierungszone</div>
+                    <div class="zone-range" id="zone3">
+                        <div class="zone-price-row">
+                            <span class="zone-price-label">Unter</span>
+                            <span class="zone-price-value negative" id="z3limit">-</span>
+                        </div>
+                        <div class="zone-time" id="z3time">Trendumkehr wahrscheinlich</div>
+                    </div>
+                </div>
+
+                <div class="insights-panel">
+                    <div class="insights-title">Trade Metriken</div>
+                    <div class="metric-row">
+                        <span class="metric-label">Risiko/Rendite</span>
+                        <span class="metric-value" id="rrRatio">-</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Erwarteter Gewinn</span>
+                        <span class="metric-value positive" id="expProfit">-</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Max Verlust</span>
+                        <span class="metric-value negative" id="maxLoss">-</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Position Size (1% Risk)</span>
+                        <span class="metric-value" id="posSize">-</span>
                     </div>
                 </div>
             </div>
@@ -479,7 +489,6 @@
             return 365;
         }
 
-        // Dynamische Dezimalstellen basierend auf Preis
         function formatPrice(price) {
             if (price >= 10000) return Math.round(price).toLocaleString('de-DE');
             if (price >= 1000) return Math.round(price).toLocaleString('de-DE');
@@ -490,7 +499,6 @@
             return price.toFixed(6);
         }
 
-        // Zeitfenster basierend auf Zeitrahmen
         function getTimeWindow(tf, multiplier = 1) {
             const windows = {
                 '1h': { min: Math.round(2 * multiplier), max: Math.round(6 * multiplier), unit: 'Stunden' },
@@ -499,10 +507,10 @@
                 '1w': { min: Math.round(1 * multiplier), max: Math.round(4 * multiplier), unit: 'Monate' }
             };
             const w = windows[tf] || windows['1d'];
-            return `in ${w.min}-${w.max} ${w.unit}`;
+            return `${w.min}-${w.max} ${w.unit}`;
         }
 
-        function detectAndMarkWaves(candles, series) {
+        function detectWaves(candles) {
             const pivots = [];
             const strength = 5;
             
@@ -516,18 +524,7 @@
                 if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
             }
             
-            const recentPivots = pivots.slice(-6);
-            const markers = recentPivots.map((p, idx) => ({
-                time: p.time,
-                position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                color: idx === 2 ? '#6366f1' : idx === 4 ? '#06b6d4' : '#f59e0b',
-                shape: 'circle',
-                text: 'W' + (idx + 1),
-                size: 1.5
-            }));
-            
-            series.setMarkers(markers);
-            return recentPivots.length;
+            return pivots.slice(-6);
         }
 
         async function loadAnalysis() {
@@ -536,8 +533,9 @@
             const period = document.getElementById('lookback').value;
             const lb = getCandleCount(period, tf);
 
-            document.getElementById('scenario1').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-
+            // Loading state
+            document.getElementById('z1min').textContent = '...';
+            
             try {
                 const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${lb}`);
                 const data = await res.json();
@@ -551,10 +549,15 @@
                 }));
 
                 const price = candles[candles.length - 1].close;
-                const target1 = price * 1.15;
-                const target2 = price * 1.08;
-                const target3 = price * 0.85;
-                const stop = price * 0.92;
+                const avgRange = candles.slice(-20).reduce((a, c) => a + (c.high - c.low), 0) / 20;
+                
+                // Zielzonen mit Bandbreite
+                const z1min = price * 1.12;
+                const z1max = price * 1.18;
+                const z2min = price * 1.05;
+                const z2max = price * 1.10;
+                const stopLevel = price * 0.92;
+                const invalidation = price * 0.88;
 
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
@@ -562,7 +565,7 @@
                     grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
                     rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
                     timeScale: { borderColor: 'rgba(255,255,255,0.08)', timeVisible: true },
-                    height: 500
+                    height: 550
                 });
 
                 candleSeries = chart.addCandlestickSeries({
@@ -572,75 +575,63 @@
                 });
                 candleSeries.setData(candles);
                 
-                const waveCount = detectAndMarkWaves(candles, candleSeries);
+                // Zielzonen als horizontale Linien
+                const line1max = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.5)', lineWidth: 2, lineStyle: 2 });
+                const line1min = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.3)', lineWidth: 1, lineStyle: 2 });
+                const line2 = chart.addLineSeries({ color: 'rgba(245, 158, 11, 0.4)', lineWidth: 1, lineStyle: 2 });
+                const lineStop = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.5)', lineWidth: 2 });
+                
+                const lastTime = candles[candles.length - 1].time;
+                const futureTime = lastTime + (candles[1].time - candles[0].time) * 10;
+                
+                line1max.setData([{time: lastTime, value: z1max}, {time: futureTime, value: z1max}]);
+                line1min.setData([{time: lastTime, value: z1min}, {time: futureTime, value: z1min}]);
+                line2.setData([{time: lastTime, value: (z2min+z2max)/2}, {time: futureTime, value: (z2min+z2max)/2}]);
+                lineStop.setData([{time: lastTime, value: stopLevel}, {time: futureTime, value: stopLevel}]);
+                
+                // Wellen-Marker
+                const waves = detectWaves(candles);
+                const markers = waves.map((p, idx) => ({
+                    time: p.time,
+                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
+                    color: idx % 2 === 0 ? '#6366f1' : '#06b6d4',
+                    shape: 'circle',
+                    text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)', '(a)'][idx] || 'W' + idx,
+                    size: 1.5
+                }));
+                candleSeries.setMarkers(markers);
+                
                 chart.timeScale().fitContent();
 
-                // Szenario 1: Primär
-                document.getElementById('scenario1').innerHTML = `
-                    <p><strong>Struktur:</strong> Welle ${Math.min(waveCount, 5)} (Impuls)</p>
-                    <div class="target-zone primary">
-                        <div class="target-price">Ziel: $${formatPrice(target1)}</div>
-                        <div class="target-time">${getTimeWindow(tf, 1.5)}</div>
-                    </div>
-                    <p><strong>Stop:</strong> $${formatPrice(stop)}</p>
-                    <p style="margin-top:0.5rem;color:#10b981;">✓ Struktur intakt</p>
-                `;
-
-                // Szenario 2: Alternativ
-                document.getElementById('scenario2').innerHTML = `
-                    <p><strong>Struktur:</strong> ABC-Korrektur</p>
-                    <div class="target-zone secondary">
-                        <div class="target-price">Ziel: $${formatPrice(target2)}</div>
-                        <div class="target-time">${getTimeWindow(tf, 1)}</div>
-                    </div>
-                    <p style="margin-top:0.5rem;color:#f59e0b;">⚠ Konsolidierungsphase</p>
-                `;
-
-                // Szenario 3: Risiko
-                document.getElementById('scenario3').innerHTML = `
-                    <p><strong>Invalidierung:</strong> Unter $${formatPrice(stop)}</p>
-                    <div class="target-zone tertiary">
-                        <div class="target-price">Ziel: $${formatPrice(target3)}</div>
-                        <div class="target-time">${getTimeWindow(tf, 2)}</div>
-                    </div>
-                    <p style="margin-top:0.5rem;color:#ef4444;">✗ Trendbruch möglich</p>
-                `;
-
-                // Insights
-                const rr = ((target1 - price) / (price - stop)).toFixed(1);
-                document.getElementById('insights').innerHTML = `
-                    <div class="insight-item">
-                        <div class="insight-icon">🎯</div>
-                        <div class="insight-content">
-                            <h4>Zielzone 1</h4>
-                            <p>$${formatPrice(target1)} ${getTimeWindow(tf, 1.5)}</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon">🎯</div>
-                        <div class="insight-content">
-                            <h4>Zielzone 2</h4>
-                            <p>$${formatPrice(target2)} ${getTimeWindow(tf, 1)}</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon">🛡️</div>
-                        <div class="insight-content">
-                            <h4>Stop-Loss</h4>
-                            <p>$${formatPrice(stop)}</p>
-                        </div>
-                    </div>
-                    <div class="insight-item">
-                        <div class="insight-icon">📈</div>
-                        <div class="insight-content">
-                            <h4>Risiko/Rendite</h4>
-                            <p>1:${rr}</p>
-                        </div>
-                    </div>
-                `;
+                // UI Updates
+                document.getElementById('z1min').textContent = '$' + formatPrice(z1min);
+                document.getElementById('z1max').textContent = '$' + formatPrice(z1max);
+                document.getElementById('z1time').textContent = '⏱️ ' + getTimeWindow(tf, 1.5);
+                
+                document.getElementById('z2min').textContent = '$' + formatPrice(z2min);
+                document.getElementById('z2max').textContent = '$' + formatPrice(z2max);
+                document.getElementById('z2time').textContent = '⏱️ ' + getTimeWindow(tf, 1);
+                
+                document.getElementById('entryPrice').textContent = '$' + formatPrice(price);
+                document.getElementById('stopPrice').textContent = '$' + formatPrice(stopLevel);
+                document.getElementById('tpPrice').textContent = '$' + formatPrice((z1min+z1max)/2);
+                
+                document.getElementById('z3limit').textContent = '$' + formatPrice(invalidation);
+                
+                // Metriken
+                const risk = price - stopLevel;
+                const reward = ((z1min + z1max) / 2) - price;
+                const rr = (reward / risk).toFixed(1);
+                const profitPct = ((reward / price) * 100).toFixed(1);
+                const lossPct = ((risk / price) * 100).toFixed(1);
+                
+                document.getElementById('rrRatio').textContent = '1:' + rr;
+                document.getElementById('expProfit').textContent = '+' + profitPct + '%';
+                document.getElementById('maxLoss').textContent = '-' + lossPct + '%';
+                document.getElementById('posSize').textContent = '$' + Math.round(100 / (lossPct/100)).toLocaleString('de-DE');
 
             } catch (e) {
-                document.getElementById('scenario1').innerHTML = 'Fehler: ' + e.message;
+                console.error(e);
             }
         }
 
