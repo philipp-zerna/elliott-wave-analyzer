@@ -455,7 +455,10 @@
                     crosshair: { mode: 0 }
                 });
                 
-                candleSeries = chart.addCandlestickSeries({
+                candleSeries = chart.addLineSeries({
+                    color: "#e6edf3",
+                    lineWidth: 2,
+                    lastValueVisible: false
                     upColor: '#238636', 
                     downColor: '#da3633',
                     borderUpColor: '#238636', 
@@ -463,7 +466,8 @@
                     wickUpColor: '#238636', 
                     wickDownColor: '#da3633'
                 });
-                candleSeries.setData(candles);
+                const lineData = candles.map(c => ({ time: c.time, value: c.close }));
+                candleSeries.setData(lineData);
                 
                 // Prognoselinien
                 const lastTime = candles[candles.length - 1].time;
