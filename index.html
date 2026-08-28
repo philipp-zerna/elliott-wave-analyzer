@@ -16,11 +16,11 @@
             --text-muted: #8b949e;
             --green: #238636;
             --green-light: #3fb950;
-            --green-bg: rgba(35, 134, 54, 0.15);
+            --green-bg: rgba(35, 134, 54, 0.2);
             --yellow: #f0883e;
-            --yellow-bg: rgba(240, 136, 62, 0.15);
+            --yellow-bg: rgba(240, 136, 62, 0.2);
             --red: #da3633;
-            --red-bg: rgba(218, 54, 51, 0.15);
+            --red-bg: rgba(218, 54, 51, 0.2);
         }
         
         body {
@@ -118,7 +118,7 @@
             font-size: 0.95rem;
         }
         
-        #chart { height: 280px; }
+        #chart { height: 320px; }
         
         .zones-container { padding: 0.5rem; }
         
@@ -310,7 +310,7 @@
     </div>
 
     <script>
-        let chart = null, candleSeries = null;
+        let chart = null;
         
         const COINS = {
             'SOLUSDT': 'Solana', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum',
@@ -332,42 +332,11 @@
         }
         
         function getTimeConfig(tf) {
-            // Korrekte Limits für sichtbare Zeitachse
             const configs = {
-                '1h': { 
-                    limit: 720,  // 1 Monat = 30 Tage * 24 Stunden
-                    label: '1H (30 Tage)',
-                    timeFormatter: (time) => {
-                        const date = new Date(time * 1000);
-                        return date.getDate() + '.';
-                    }
-                },
-                '4h': { 
-                    limit: 480,  // 4 Monate = 120 Tage * 6 (4h pro Tag)
-                    label: '4H (4 Monate)',
-                    timeFormatter: (time) => {
-                        const date = new Date(time * 1000);
-                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                        return months[date.getMonth()];
-                    }
-                },
-                '1d': { 
-                    limit: 365,  // 1 Jahr
-                    label: '1D (1 Jahr)',
-                    timeFormatter: (time) => {
-                        const date = new Date(time * 1000);
-                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                        return months[date.getMonth()];
-                    }
-                },
-                '1w': { 
-                    limit: 104,  // 2 Jahre
-                    label: '1W (2 Jahre)',
-                    timeFormatter: (time) => {
-                        const date = new Date(time * 1000);
-                        return date.getFullYear().toString().substr(2);
-                    }
-                }
+                '1h': { limit: 720, label: '1H (30 Tage)' },
+                '4h': { limit: 480, label: '4H (4 Monate)' },
+                '1d': { limit: 365, label: '1D (1 Jahr)' },
+                '1w': { limit: 104, label: '1W (2 Jahre)' }
             };
             return configs[tf] || configs['1d'];
         }
@@ -399,30 +368,20 @@
                 const stop = price * 0.92;
                 const tp = (z1min + z1max) / 2;
                 
-                // Zeitachsen-Beschriftung je nach Timeframe
+                // Zeitachsen-Formatter
                 let tickFormatter;
                 if (tf === '1h') {
-                    // Bei 1H: Tage anzeigen (1., 5., 10. etc.)
                     tickFormatter = (time) => {
                         const date = new Date(time * 1000);
                         return date.getDate() + '.';
                     };
-                } else if (tf === '4h') {
-                    // Bei 4H: Monate anzeigen
-                    tickFormatter = (time) => {
-                        const date = new Date(time * 1000);
-                        const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                        return months[date.getMonth()];
-                    };
-                } else if (tf === '1d') {
-                    // Bei 1D: Monate anzeigen
+                } else if (tf === '4h' || tf === '1d') {
                     tickFormatter = (time) => {
                         const date = new Date(time * 1000);
                         const months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
                         return months[date.getMonth()];
                     };
                 } else {
-                    // Bei 1W: Jahre anzeigen
                     tickFormatter = (time) => {
                         const date = new Date(time * 1000);
                         return date.getFullYear().toString();
@@ -443,7 +402,7 @@
                     },
                     rightPriceScale: { 
                         borderColor: '#30363d',
-                        scaleMargins: { top: 0.1, bottom: 0.1 }
+                        scaleMargins: { top: 0.15, bottom: 0.15 }
                     },
                     timeScale: { 
                         borderColor: '#30363d',
@@ -451,36 +410,82 @@
                         tickMarkFormatter: tickFormatter,
                         barSpacing: tf === '1h' ? 3 : tf === '4h' ? 6 : 8
                     },
-                    height: 280,
+                    height: 320,
                     crosshair: { mode: 0 }
                 });
                 
-                candleSeries = chart.addLineSeries({
-                    color: "#e6edf3",
+                // HAUPTLINIE (weiß) - Kursverlauf
+                const mainLine = chart.addLineSeries({ 
+                    color: '#e6edf3', 
                     lineWidth: 2,
                     lastValueVisible: false
-                    upColor: '#238636', 
-                    downColor: '#da3633',
-                    borderUpColor: '#238636', 
-                    borderDownColor: '#da3633',
-                    wickUpColor: '#238636', 
-                    wickDownColor: '#da3633'
                 });
                 const lineData = candles.map(c => ({ time: c.time, value: c.close }));
-                candleSeries.setData(lineData);
+                mainLine.setData(lineData);
                 
-                // Prognoselinien
+                // ZIELZONEN ALS BÄNDER (BOXEN) im Chart
                 const lastTime = candles[candles.length - 1].time;
                 const timeStep = candles[1].time - candles[0].time;
                 const futureSteps = tf === '1h' ? 48 : tf === '4h' ? 30 : tf === '1d' ? 30 : 12;
+                const futureTime = lastTime + (timeStep * futureSteps);
                 
+                // ZIELZONE 1 als grünes Band (oberste)
+                const z1TopLine = chart.addLineSeries({ 
+                    color: 'rgba(35, 134, 54, 0.8)', 
+                    lineWidth: 1,
+                    lastValueVisible: true,
+                    title: 'Z1 Max'
+                });
+                const z1BottomLine = chart.addLineSeries({ 
+                    color: 'rgba(35, 134, 54, 0.4)', 
+                    lineWidth: 1,
+                    lineStyle: 2,
+                    lastValueVisible: false,
+                    title: 'Z1 Min'
+                });
+                
+                z1TopLine.setData([
+                    {time: lastTime, value: z1max}, 
+                    {time: futureTime, value: z1max}
+                ]);
+                z1BottomLine.setData([
+                    {time: lastTime, value: z1min}, 
+                    {time: futureTime, value: z1min}
+                ]);
+                
+                // ZIELZONE 2 als gelbes Band (mittlere)
+                const z2TopLine = chart.addLineSeries({ 
+                    color: 'rgba(240, 136, 62, 0.6)', 
+                    lineWidth: 1,
+                    lineStyle: 2,
+                    lastValueVisible: false
+                });
+                const z2BottomLine = chart.addLineSeries({ 
+                    color: 'rgba(240, 136, 62, 0.3)', 
+                    lineWidth: 1,
+                    lineStyle: 3,
+                    lastValueVisible: false
+                });
+                
+                z2TopLine.setData([
+                    {time: lastTime, value: z2max}, 
+                    {time: futureTime, value: z2max}
+                ]);
+                z2BottomLine.setData([
+                    {time: lastTime, value: z2min}, 
+                    {time: futureTime, value: z2min}
+                ]);
+                
+                // PROGNOSENLINIEN
+                // Gelbe durchgezogene = Wahrscheinlichster Fall (Zielzone 1)
                 const primaryLine = chart.addLineSeries({ 
                     color: '#f0883e', 
-                    lineWidth: 2,
+                    lineWidth: 2.5,
                     lineStyle: 0,
                     lastValueVisible: false
                 });
                 
+                // Grüne gestrichelte = Alternativ (Zielzone 2)
                 const secondaryLine = chart.addLineSeries({ 
                     color: '#3fb950', 
                     lineWidth: 2,
@@ -494,8 +499,10 @@
                 for (let i = 0; i <= futureSteps; i++) {
                     const t = lastTime + (timeStep * i);
                     const progress = i / futureSteps;
-                    const p1 = price + (z1min - price) * progress;
-                    const p2 = price + (z2min - price) * progress;
+                    // Gelbe Linie steigt zum Zielzone 1 Durchschnitt
+                    const p1 = price + ((z1min + z1max)/2 - price) * progress;
+                    // Grüne Linie steigt zum Zielzone 2 Durchschnitt  
+                    const p2 = price + ((z2min + z2max)/2 - price) * progress;
                     primaryData.push({ time: t, value: p1 });
                     secondaryData.push({ time: t, value: p2 });
                 }
@@ -503,16 +510,17 @@
                 primaryLine.setData(primaryData);
                 secondaryLine.setData(secondaryData);
                 
-                // Horizontale Ziellinien
-                const z1Line = chart.addLineSeries({ 
-                    color: 'rgba(35, 134, 54, 0.5)', 
+                // STOP-LOSS Linie (rot)
+                const stopLine = chart.addLineSeries({ 
+                    color: 'rgba(218, 54, 51, 0.6)', 
                     lineWidth: 1,
                     lineStyle: 2,
-                    lastValueVisible: true
+                    lastValueVisible: true,
+                    title: 'Stop'
                 });
-                z1Line.setData([
-                    {time: lastTime, value: z1min}, 
-                    {time: lastTime + timeStep * futureSteps, value: z1min}
+                stopLine.setData([
+                    {time: lastTime, value: stop}, 
+                    {time: futureTime, value: stop}
                 ]);
                 
                 // Wellen-Marker
@@ -534,11 +542,11 @@
                     text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)'][idx],
                     size: 0.8
                 }));
-                candleSeries.setMarkers(markers);
+                mainLine.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
                 
-                // UI
+                // UI Updates
                 document.getElementById('currentPrice').textContent = formatPrice(price);
                 document.getElementById('z1range').textContent = formatPrice(z1min) + ' - ' + formatPrice(z1max);
                 document.getElementById('z1time').textContent = '⏱ Erwartet ' + (tf === '1h' ? 'in 6-12 Stunden' : tf === '4h' ? 'in 2-3 Wochen' : tf === '1d' ? 'in 2-4 Wochen' : 'in 3-6 Monaten');
