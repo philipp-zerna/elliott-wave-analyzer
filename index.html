@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wave Intelligence</title>
+    <title>Wave Intelligence - Langfrist Analyse</title>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,10 +15,12 @@
             --text: #ffffff;
             --text-muted: #6b7280;
             --green: #10b981;
-            --green-dark: #059669;
             --green-bg: rgba(16, 185, 129, 0.1);
             --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.1);
             --yellow: #f59e0b;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
         }
         
         body {
@@ -28,8 +30,7 @@
             min-height: 100vh;
         }
         
-        /* Header */
-        .top-bar {
+        .header {
             background: var(--card);
             padding: 1rem;
             display: flex;
@@ -38,58 +39,56 @@
             border-bottom: 1px solid var(--border);
         }
         
-        .menu-btn {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-        }
+        .logo { font-size: 1.25rem; font-weight: 700; }
         
-        .menu-btn span {
-            height: 2px;
-            background: var(--text);
-            border-radius: 1px;
-        }
-        
-        .coin-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        /* Controls - nur 2 Dropdowns */
         .controls {
             padding: 0.75rem 1rem;
             display: flex;
             gap: 0.5rem;
-            overflow-x: auto;
             background: var(--card);
             border-bottom: 1px solid var(--border);
+            overflow-x: auto;
         }
         
-        .controls select {
+        .controls select, .controls button {
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--text);
             padding: 0.5rem 0.75rem;
             border-radius: 8px;
             font-size: 0.875rem;
-            min-width: 120px;
         }
         
         .analyze-btn {
-            background: var(--green);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            background: var(--green) !important;
+            border: none !important;
             font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
         }
         
-        /* Chart Container */
+        .chart-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        
+        .tab.active {
+            background: var(--green-bg);
+            color: var(--green);
+            border-color: var(--green);
+        }
+        
         .chart-wrapper {
             background: var(--card);
             margin: 0.5rem;
@@ -102,20 +101,7 @@
             padding: 0.75rem 1rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             border-bottom: 1px solid var(--border);
-        }
-        
-        .chart-pair {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-        }
-        
-        .chart-pair::before {
-            content: '◆';
-            color: var(--yellow);
         }
         
         .current-price {
@@ -124,295 +110,316 @@
             padding: 0.25rem 0.75rem;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 1.1rem;
         }
         
-        #chart {
-            height: 380px;
-        }
+        #chart { height: 300px; }
         
-        /* Zielzonen */
-        .zones-container {
-            padding: 0.75rem;
-        }
+        .zones-container { padding: 0.75rem; }
         
-        .zone-section {
+        .wave-grade {
             background: var(--card);
             border-radius: 12px;
-            margin-bottom: 0.75rem;
-            overflow: hidden;
+            margin-bottom: 1rem;
             border: 1px solid var(--border);
+            overflow: hidden;
         }
         
-        .zone-header {
+        .grade-header {
             padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: linear-gradient(90deg, var(--green-bg), transparent);
             border-bottom: 1px solid var(--border);
         }
         
-        .zone-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .zone-badge {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-        
-        .badge-high { background: var(--green-bg); color: var(--green); }
-        .badge-medium { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
-        .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--red); }
-        
-        .zone-content {
-            padding: 1rem;
-        }
-        
-        .target-box {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
-            border: 2px solid var(--green);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .target-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.25rem;
-        }
-        
-        .target-range {
-            font-size: 1.5rem;
+        .grade-title {
             font-weight: 700;
+            font-size: 1rem;
             color: var(--green);
-            font-family: 'SF Mono', monospace;
         }
         
-        .target-time {
-            font-size: 0.875rem;
+        .grade-subtitle {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        
+        .zone-box {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .zone-box:last-child { border-bottom: none; }
+        
+        .zone-label-row {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
         }
         
-        .target-time::before {
-            content: '⏱';
+        .zone-name {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
         
-        /* Handelszone */
-        .trade-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-            margin-top: 0.5rem;
+        .zone-prob {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
         }
         
-        .trade-item {
+        .prob-high { background: var(--green-bg); color: var(--green); }
+        .prob-medium { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+        .prob-low { background: var(--red-bg); color: var(--red); }
+        
+        .target-display {
             background: rgba(255,255,255,0.03);
             border-radius: 8px;
             padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        
+        .target-main {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        
+        .target-green { color: var(--green); }
+        .target-red { color: var(--red); }
+        .target-yellow { color: var(--yellow); }
+        
+        .target-details {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .correction-box {
+            background: linear-gradient(135deg, var(--red-bg), rgba(239,68,68,0.05));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .impulse-box {
+            background: linear-gradient(135deg, var(--green-bg), rgba(16,185,129,0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .setup-item {
+            background: rgba(255,255,255,0.03);
+            padding: 0.75rem;
+            border-radius: 8px;
             text-align: center;
         }
         
-        .trade-label {
+        .setup-label {
             font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
             margin-bottom: 0.25rem;
         }
         
-        .trade-value {
-            font-size: 1rem;
+        .setup-value {
+            font-size: 0.95rem;
             font-weight: 700;
             font-family: monospace;
         }
         
-        .trade-value.entry { color: var(--text); }
-        .trade-value.stop { color: var(--red); }
-        .trade-value.tp { color: var(--green); }
-        
-        /* Disclaimer */
         .disclaimer {
             padding: 1rem;
             font-size: 0.75rem;
             color: var(--text-muted);
             text-align: center;
-            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="top-bar">
-        <div class="menu-btn"><span></span><span></span><span></span></div>
-        <div class="coin-name" id="headerCoin">Solana</div>
+    <div class="header">
+        <div class="logo">📈 Wave Intelligence</div>
     </div>
     
-    <!-- Controls - nur Coin und Zeitrahmen -->
     <div class="controls">
         <select id="symbol" onchange="updateCoin()">
-            <option value="SOLUSDT" selected>SOL</option>
-            <option value="BTCUSDT">BTC</option>
-            <option value="ETHUSDT">ETH</option>
+            <option value="BTCUSDT" selected>Bitcoin</option>
+            <option value="ETHUSDT">Ethereum</option>
+            <option value="SOLUSDT">Solana</option>
             <option value="XRPUSDT">XRP</option>
-            <option value="LINKUSDT">LINK</option>
-            <option value="AVAXUSDT">AVAX</option>
-            <option value="NEARUSDT">NEAR</option>
-            <option value="SUIUSDT">SUI</option>
-            <option value="KASUSDT">KAS</option>
-            <option value="RENDERUSDT">RENDER</option>
-        </select>
-        <select id="timeframe">
-            <option value="1h">1H</option>
-            <option value="4h">4H</option>
-            <option value="1d" selected>1D</option>
-            <option value="1w">1W</option>
+            <option value="LINKUSDT">Chainlink</option>
+            <option value="AVAXUSDT">Avalanche</option>
         </select>
         <button class="analyze-btn" onclick="analyze()">Analysieren</button>
     </div>
     
-    <!-- Chart -->
+    <div class="chart-tabs">
+        <div class="tab active" onclick="switchTab('1w')">Woche</div>
+        <div class="tab" onclick="switchTab('1d')">Tag</div>
+        <div class="tab" onclick="switchTab('4h')">4H</div>
+    </div>
+    
     <div class="chart-wrapper">
         <div class="chart-header">
-            <div class="chart-pair" id="chartPair">SOLUSDT</div>
-            <div class="current-price" id="currentPrice">-</div>
+            <span id="chartPair">BTCUSDT</span>
+            <span class="current-price" id="currentPrice">-</span>
         </div>
         <div id="chart"></div>
     </div>
     
-    <!-- Zielzonen -->
     <div class="zones-container">
-        <!-- Primäre Zone -->
-        <div class="zone-section">
-            <div class="zone-header">
-                <span class="zone-title">🎯 Primäre Zielzone</span>
-                <span class="zone-badge badge-high">Wahrscheinlichkeit: Hoch</span>
+        <!-- Primärer Trend (Welle 3/5) -->
+        <div class="wave-grade">
+            <div class="grade-header">
+                <div class="grade-title">🚀 Primärer Aufwärtstrend</div>
+                <div class="grade-subtitle">Welle 3 & 5 - Langfristige Ziele</div>
             </div>
-            <div class="zone-content">
-                <div class="target-box">
-                    <div class="target-label">Kursbereich</div>
-                    <div class="target-range" id="z1range">-</div>
-                    <div class="target-time" id="z1time">-</div>
+            
+            <div class="zone-box impulse-box">
+                <div class="zone-label-row">
+                    <span class="zone-name">Zielzone Welle 3</span>
+                    <span class="zone-prob prob-high">Hoch</span>
+                </div>
+                <div class="target-display">
+                    <div class="target-main target-green" id="w3target">-</div>
+                    <div class="target-details">
+                        <span>⏱ <span id="w3time">-</span></span>
+                        <span>📊 <span id="w3gain">-</span></span>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Alternative Zone -->
-        <div class="zone-section">
-            <div class="zone-header">
-                <span class="zone-title">📊 Alternative Zone</span>
-                <span class="zone-badge badge-medium">Wahrscheinlichkeit: Mittel</span>
-            </div>
-            <div class="zone-content">
-                <div class="target-box" style="border-color: var(--yellow); background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));">
-                    <div class="target-label">Kursbereich</div>
-                    <div class="target-range" style="color: var(--yellow);" id="z2range">-</div>
-                    <div class="target-time" id="z2time">-</div>
+            
+            <div class="zone-box impulse-box">
+                <div class="zone-label-row">
+                    <span class="zone-name">Zielzone Welle 5</span>
+                    <span class="zone-prob prob-medium">Mittel</span>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Handelszone -->
-        <div class="zone-section">
-            <div class="zone-header">
-                <span class="zone-title">⚡ Handelszone</span>
-                <span class="zone-badge badge-high">Setup Aktiv</span>
-            </div>
-            <div class="zone-content">
-                <div class="trade-grid">
-                    <div class="trade-item">
-                        <div class="trade-label">Entry</div>
-                        <div class="trade-value entry" id="entryVal">-</div>
-                    </div>
-                    <div class="trade-item">
-                        <div class="trade-label">Stop-Loss</div>
-                        <div class="trade-value stop" id="stopVal">-</div>
-                    </div>
-                    <div class="trade-item">
-                        <div class="trade-label">Take Profit</div>
-                        <div class="trade-value tp" id="tpVal">-</div>
+                <div class="target-display">
+                    <div class="target-main target-green" id="w5target">-</div>
+                    <div class="target-details">
+                        <span>⏱ <span id="w5time">-</span></span>
+                        <span>📊 <span id="w5gain">-</span></span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Risiko Zone -->
-        <div class="zone-section">
-            <div class="zone-header">
-                <span class="zone-title">⚠️ Risiko-Zone</span>
-                <span class="zone-badge badge-low">Wahrscheinlichkeit: Niedrig</span>
+        <!-- Korrektur (ABC) -->
+        <div class="wave-grade">
+            <div class="grade-header" style="background: linear-gradient(90deg, var(--red-bg), transparent);">
+                <div class="grade-title" style="color: var(--red);">📉 Korrekturphase (ABC)</div>
+                <div class="grade-subtitle">Nach Abschluss der 5-Wellen-Sequenz</div>
             </div>
-            <div class="zone-content">
-                <div class="target-box" style="border-color: var(--red); background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));">
-                    <div class="target-label">Invalidierung unter</div>
-                    <div class="target-range" style="color: var(--red);" id="z3limit">-</div>
-                    <div class="target-time">Trendumkehr wahrscheinlich</div>
+            
+            <div class="zone-box correction-box">
+                <div class="zone-label-row">
+                    <span class="zone-name">Zone A (Erste Abwärtswelle)</span>
+                    <span class="zone-prob prob-medium">Mittel</span>
+                </div>
+                <div class="target-display">
+                    <div class="target-main target-yellow" id="zoneAtarget">-</div>
+                    <div class="target-details">
+                        <span>⏱ <span id="zoneAtime">-</span></span>
+                        <span>📉 <span id="zoneAdrop">-</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="zone-box correction-box">
+                <div class="zone-label-row">
+                    <span class="zone-name">Zone C (Tiefpunkt Korrektur)</span>
+                    <span class="zone-prob prob-low">Niedrig</span>
+                </div>
+                <div class="target-display">
+                    <div class="target-main target-red" id="zoneCtarget">-</div>
+                    <div class="target-details">
+                        <span>⏱ <span id="zoneCtime">-</span></span>
+                        <span>📉 <span id="zoneCdrop">-</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Aktuelles Setup -->
+        <div class="wave-grade">
+            <div class="grade-header" style="background: linear-gradient(90deg, rgba(59,130,246,0.2), transparent);">
+                <div class="grade-title" style="color: var(--blue);">⚡ Aktuelles Setup</div>
+                <div class="grade-subtitle">Einstieg & Risk Management</div>
+            </div>
+            <div class="setup-grid">
+                <div class="setup-item">
+                    <div class="setup-label">Entry</div>
+                    <div class="setup-value" id="setupEntry">-</div>
+                </div>
+                <div class="setup-item">
+                    <div class="setup-label">Stop-Loss</div>
+                    <div class="setup-value" style="color: var(--red);" id="setupStop">-</div>
+                </div>
+                <div class="setup-item">
+                    <div class="setup-label">Target W3</div>
+                    <div class="setup-value" style="color: var(--green);" id="setupTarget">-</div>
                 </div>
             </div>
         </div>
     </div>
     
     <div class="disclaimer">
-        ⚠️ Diese Analyse dient ausschließlich zu Bildungszwecken.<br>
-        Keine Anlageberatung. Kryptowährungen sind hochspekulativ.
+        ⚠️ Langfristige Prognosen basieren auf Elliott-Wellen-Theorie.<br>
+        Keine Garantie. Märkte können unvorhersehbar reagieren.
     </div>
 
     <script>
         let chart = null, candleSeries = null;
+        let currentTf = '1w';
         
         const COINS = {
             'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
-            'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink', 'AVAXUSDT': 'Avalanche',
-            'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui', 'KASUSDT': 'Kaspa', 
-            'RENDERUSDT': 'Render'
+            'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink', 'AVAXUSDT': 'Avalanche'
         };
         
         function updateCoin() {
             const sym = document.getElementById('symbol').value;
-            document.getElementById('headerCoin').textContent = COINS[sym] || sym.replace('USDT','');
             document.getElementById('chartPair').textContent = sym;
         }
         
+        function switchTab(tf) {
+            currentTf = tf;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            analyze();
+        }
+        
         function getLimit(tf) {
-            // Immer 1 Jahr Daten
-            if (tf === '1h') return 8760;
-            if (tf === '4h') return 2190;
-            if (tf === '1d') return 365;
-            if (tf === '1w') return 52;
-            return 365;
+            if (tf === '4h') return 2000;
+            if (tf === '1d') return 730;  // 2 Jahre
+            if (tf === '1w') return 200;  // ~4 Jahre
+            return 200;
         }
         
         function formatPrice(price) {
-            if (price >= 10000) return Math.round(price).toLocaleString('de-DE');
-            if (price >= 1000) return Math.round(price).toLocaleString('de-DE');
-            if (price >= 100) return price.toFixed(2);
-            if (price >= 1) return price.toFixed(3);
-            if (price >= 0.1) return price.toFixed(4);
-            if (price >= 0.01) return price.toFixed(5);
-            return price.toFixed(6);
+            if (price >= 10000) return '$' + Math.round(price).toLocaleString('de-DE');
+            if (price >= 1000) return '$' + Math.round(price).toLocaleString('de-DE');
+            if (price >= 100) return '$' + price.toFixed(2);
+            if (price >= 1) return '$' + price.toFixed(3);
+            return '$' + price.toFixed(5);
         }
         
-        function getTimeWindow(tf) {
-            const map = {'1h': '2-6 Stunden', '4h': '1-3 Tage', '1d': '2-4 Wochen', '1w': '1-3 Monate'};
-            return map[tf] || '2-4 Wochen';
+        function calcGain(current, target) {
+            const pct = ((target - current) / current * 100).toFixed(1);
+            return (pct > 0 ? '+' : '') + pct + '%';
         }
         
         async function analyze() {
             const symbol = document.getElementById('symbol').value;
-            const tf = document.getElementById('timeframe').value;
-            const limit = getLimit(tf);
+            const limit = getLimit(currentTf);
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${currentTf}&limit=${limit}`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -425,23 +432,21 @@
                 
                 const price = candles[candles.length - 1].close;
                 
-                // Zielzonen berechnen
-                const z1min = price * 1.12;
-                const z1max = price * 1.19;
-                const z2min = price * 1.06;
-                const z2max = price * 1.11;
-                const stop = price * 0.92;
-                const invalidation = price * 0.88;
-                const tp = (z1min + z1max) / 2;
+                // Langfristige Zielzonen (mehrere Wellengrade)
+                const w3Target = price * 1.45;      // Welle 3: +45%
+                const w5Target = price * 1.85;      // Welle 5: +85%
+                const zoneA = price * 0.75;         // Korrektur A: -25%
+                const zoneC = price * 0.55;         // Korrektur C: -45%
+                const stop = price * 0.88;          // Stop: -12%
                 
                 // Chart
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
                     layout: { background: { color: '#111827' }, textColor: '#9ca3af' },
-                    grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+                    grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
                     rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
                     timeScale: { borderColor: 'rgba(255,255,255,0.1)', timeVisible: true },
-                    height: 380
+                    height: 300
                 });
                 
                 candleSeries = chart.addCandlestickSeries({
@@ -450,51 +455,47 @@
                 });
                 candleSeries.setData(candles);
                 
-                // Zielzonen als Linien
-                const z1minLine = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.6)', lineWidth: 2, lineStyle: 2 });
-                const z1maxLine = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.8)', lineWidth: 2 });
-                const stopLine = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.6)', lineWidth: 2, lineStyle: 2 });
-                
+                // Ziellinien
                 const lastTime = candles[candles.length - 1].time;
-                const futureTime = lastTime + (candles[1].time - candles[0].time) * 15;
+                const futureTime = lastTime + (candles[1].time - candles[0].time) * 50;
                 
-                z1minLine.setData([{time: lastTime, value: z1min}, {time: futureTime, value: z1min}]);
-                z1maxLine.setData([{time: lastTime, value: z1max}, {time: futureTime, value: z1max}]);
-                stopLine.setData([{time: lastTime, value: stop}, {time: futureTime, value: stop}]);
+                const w3Line = chart.addLineSeries({ color: 'rgba(16, 185, 129, 0.8)', lineWidth: 2, lineStyle: 2 });
+                const w5Line = chart.addLineSeries({ color: 'rgba(139, 92, 246, 0.8)', lineWidth: 2, lineStyle: 2 });
+                const zoneCLine = chart.addLineSeries({ color: 'rgba(239, 68, 68, 0.6)', lineWidth: 2, lineStyle: 3 });
                 
-                // Wellen
-                const pivots = [];
-                for (let i = 5; i < candles.length - 5; i++) {
-                    const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
-                                  candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
-                    const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
-                                 candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
-                    if (isHigh) pivots.push({ time: candles[i].time, type: 'high' });
-                    if (isLow) pivots.push({ time: candles[i].time, type: 'low' });
-                }
-                
-                const markers = pivots.slice(-5).map((p, idx) => ({
-                    time: p.time,
-                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                    color: idx % 2 === 0 ? '#6366f1' : '#06b6d4',
-                    shape: 'circle',
-                    text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)'][idx],
-                    size: 1
-                }));
-                candleSeries.setMarkers(markers);
+                w3Line.setData([{time: lastTime, value: w3Target}, {time: futureTime, value: w3Target}]);
+                w5Line.setData([{time: lastTime, value: w5Target}, {time: futureTime, value: w5Target}]);
+                zoneCLine.setData([{time: lastTime, value: zoneC}, {time: futureTime, value: zoneC}]);
                 
                 chart.timeScale().fitContent();
                 
                 // UI Update
-                document.getElementById('currentPrice').textContent = '$' + formatPrice(price);
-                document.getElementById('z1range').textContent = '$' + formatPrice(z1min) + ' - $' + formatPrice(z1max);
-                document.getElementById('z1time').textContent = '⏱ Erwartet ' + getTimeWindow(tf);
-                document.getElementById('z2range').textContent = '$' + formatPrice(z2min) + ' - $' + formatPrice(z2max);
-                document.getElementById('z2time').textContent = '⏱ Erwartet ' + getTimeWindow(tf).replace('4', '2').replace('6', '3');
-                document.getElementById('entryVal').textContent = '$' + formatPrice(price);
-                document.getElementById('stopVal').textContent = '$' + formatPrice(stop);
-                document.getElementById('tpVal').textContent = '$' + formatPrice(tp);
-                document.getElementById('z3limit').textContent = '$' + formatPrice(invalidation);
+                document.getElementById('currentPrice').textContent = formatPrice(price);
+                
+                // Welle 3
+                document.getElementById('w3target').textContent = formatPrice(w3Target) + ' - ' + formatPrice(w3Target * 1.05);
+                document.getElementById('w3time').textContent = currentTf === '1w' ? '3-6 Monate' : currentTf === '1d' ? '2-4 Monate' : '4-8 Wochen';
+                document.getElementById('w3gain').textContent = calcGain(price, w3Target);
+                
+                // Welle 5
+                document.getElementById('w5target').textContent = formatPrice(w5Target) + ' - ' + formatPrice(w5Target * 1.08);
+                document.getElementById('w5time').textContent = currentTf === '1w' ? '6-12 Monate' : currentTf === '1d' ? '4-8 Monate' : '2-4 Monate';
+                document.getElementById('w5gain').textContent = calcGain(price, w5Target);
+                
+                // Korrektur A
+                document.getElementById('zoneAtarget').textContent = formatPrice(zoneA * 0.95) + ' - ' + formatPrice(zoneA);
+                document.getElementById('zoneAtime').textContent = 'nach Welle 5';
+                document.getElementById('zoneAdrop').textContent = calcGain(price, zoneA);
+                
+                // Korrektur C
+                document.getElementById('zoneCtarget').textContent = formatPrice(zoneC * 0.95) + ' - ' + formatPrice(zoneC);
+                document.getElementById('zoneCtime').textContent = 'nach Korrektur B';
+                document.getElementById('zoneCdrop').textContent = calcGain(price, zoneC);
+                
+                // Setup
+                document.getElementById('setupEntry').textContent = formatPrice(price);
+                document.getElementById('setupStop').textContent = formatPrice(stop);
+                document.getElementById('setupTarget').textContent = formatPrice(w3Target);
                 
             } catch (e) {
                 console.error(e);
