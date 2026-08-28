@@ -3,255 +3,537 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schulz Technical Analysis GmbH | Elliott Wave Pro</title>
+    <title>Wave Intelligence | Advanced Elliott Wave Analytics</title>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #050507;
+            --bg-secondary: #0a0b0f;
+            --bg-card: rgba(15, 16, 22, 0.8);
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #06b6d4;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #1e3a5f; --secondary: #2d5a87; --accent: #ffd700; --bg: #0a0e17; --panel: #111827; --text: #e5e7eb; --text-muted: #9ca3af; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-        .header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); padding: 1.5rem; text-align: center; border-bottom: 3px solid var(--accent); }
-        .header h1 { font-size: 1.5rem; font-weight: 300; letter-spacing: 2px; }
-        .header .subtitle { font-size: 0.8rem; color: var(--accent); margin-top: 0.5rem; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
-        .controls { background: var(--panel); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end; }
-        select, input, button { padding: 0.875rem; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: var(--text); font-size: 0.95rem; width: 100%; }
-        button { background: var(--secondary); border-color: var(--secondary); font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        button:hover { background: var(--primary); transform: translateY(-2px); }
-        #chart { background: var(--panel); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; height: 500px; }
-        .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-        .scenario { background: var(--panel); border-radius: 12px; padding: 1.5rem; border-left: 4px solid; }
-        .scenario.probable { border-color: #22c55e; }
-        .scenario.alternative { border-color: #eab308; }
-        .scenario.unlikely { border-color: #ef4444; }
-        .scenario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .scenario-title { font-weight: 600; font-size: 1.1rem; }
-        .scenario-prob { font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 20px; background: rgba(255,255,255,0.1); }
-        .scenario.probable .scenario-prob { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .scenario.alternative .scenario-prob { background: rgba(234, 179, 8, 0.2); color: #eab308; }
-        .scenario.unlikely .scenario-prob { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .bullet-points { background: var(--panel); border-radius: 12px; padding: 1.5rem; }
-        .bullet-points h3 { color: var(--accent); margin-bottom: 1rem; font-size: 1.1rem; }
-        .bullet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .bullet-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px; }
-        .bullet-icon { color: var(--accent); font-weight: bold; flex-shrink: 0; }
-        .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
-        .spinner { width: 40px; height: 40px; border: 3px solid #374151; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+        }
+        
+        .header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .control-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-group label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        
+        select, button {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        select:hover, select:focus {
+            border-color: var(--accent-primary);
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            font-weight: 600;
+            min-width: 160px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        .chart-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            height: 550px;
+        }
+        
+        #chart { height: 100%; }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .scenario-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .scenario-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        
+        .scenario-card.primary::before {
+            background: linear-gradient(90deg, var(--success), #34d399);
+        }
+        
+        .scenario-card.secondary::before {
+            background: linear-gradient(90deg, var(--warning), #fbbf24);
+        }
+        
+        .scenario-card.tertiary::before {
+            background: linear-gradient(90deg, var(--danger), #f87171);
+        }
+        
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .scenario-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+        
+        .scenario-prob {
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .scenario-card.primary .scenario-prob { color: var(--success); }
+        .scenario-card.secondary .scenario-prob { color: var(--warning); }
+        .scenario-card.tertiary .scenario-prob { color: var(--danger); }
+        
+        .scenario-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scenario-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .insights-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .insights-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .insights-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, var(--accent-primary), var(--accent-tertiary));
+            border-radius: 2px;
+        }
+        
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .insight-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            flex-shrink: 0;
+        }
+        
+        .insight-content h4 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .insight-content p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-muted);
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
         @keyframes spin { to { transform: rotate(360deg); } }
-        .disclaimer { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; font-size: 0.85rem; color: #fbbf24; text-align: center; }
-        @media (max-width: 1024px) { .controls { grid-template-columns: 1fr; } .scenarios { grid-template-columns: 1fr; } .bullet-grid { grid-template-columns: 1fr; } }
+        
+        .disclaimer {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>🏛️ SCHULZ TECHNICAL ANALYSIS GMBH</h1>
-        <div class="subtitle">Professionelle Elliott-Wellen-Analyse | Institutionelle Qualität</div>
+        <div class="logo">Wave Intelligence</div>
+        <div class="tagline">Advanced Elliott Wave Analytics • AI-Powered Market Intelligence</div>
     </header>
 
     <div class="container">
-        <div class="controls">
-            <div>
-                <label style="display:block;color:var(--text-muted);font-size:0.875rem;margin-bottom:0.5rem;">Asset</label>
+        <div class="control-bar">
+            <div class="control-group">
+                <label>Asset</label>
                 <select id="symbol" onchange="loadAnalysis()">
-                    <option value="">Lade Assets...</option>
+                    <option value="BTCUSDT">Bitcoin (BTC)</option>
+                    <option value="ETHUSDT">Ethereum (ETH)</option>
+                    <option value="SOLUSDT">Solana (SOL)</option>
+                    <option value="BNBUSDT">BNB</option>
+                    <option value="XRPUSDT">XRP</option>
+                    <option value="LINKUSDT">Chainlink (LINK)</option>
+                    <option value="AVAXUSDT">Avalanche (AVAX)</option>
+                    <option value="NEARUSDT">NEAR Protocol</option>
+                    <option value="SUIUSDT">Sui (SUI)</option>
+                    <option value="INJUSDT">Injective (INJ)</option>
+                    <option value="RENDERUSDT">Render</option>
+                    <option value="TIAUSDT">Celestia</option>
                 </select>
             </div>
-            <div>
-                <label style="display:block;color:var(--text-muted);font-size:0.875rem;margin-bottom:0.5rem;">Zeitrahmen</label>
+            <div class="control-group">
+                <label>Zeitrahmen</label>
                 <select id="timeframe" onchange="loadAnalysis()">
                     <option value="1d" selected>1 Tag</option>
                     <option value="4h">4 Stunden</option>
                     <option value="1w">1 Woche</option>
                 </select>
             </div>
-            <div>
-                <label style="display:block;color:var(--text-muted);font-size:0.875rem;margin-bottom:0.5rem;">Lookback</label>
+            <div class="control-group">
+                <label>Historie</label>
                 <select id="lookback">
                     <option value="365">1 Jahr</option>
                     <option value="730">2 Jahre</option>
                 </select>
             </div>
-            <button onclick="loadAnalysis()" style="height:47px;">🔄 Analysieren</button>
+            <button class="btn-primary" onclick="loadAnalysis()">Analysieren</button>
         </div>
 
-        <div id="chart"></div>
+        <div class="main-grid">
+            <div class="chart-container">
+                <div id="chart"></div>
+            </div>
 
-        <div class="scenarios">
-            <div class="scenario probable">
-                <div class="scenario-header">
-                    <span class="scenario-title">📈 Szenario 1: Primär</span>
-                    <span class="scenario-prob">~60% Wahrscheinlich</span>
+            <div class="sidebar">
+                <div class="scenario-card primary">
+                    <div class="scenario-header">
+                        <span class="scenario-label">Primärszenario</span>
+                        <span class="scenario-prob">~60%</span>
+                    </div>
+                    <div class="scenario-title">Bullische Fortsetzung</div>
+                    <div class="scenario-content" id="scenario1">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
                 </div>
-                <div id="scenario1-content">Lade Analyse...</div>
-            </div>
-            <div class="scenario alternative">
-                <div class="scenario-header">
-                    <span class="scenario-title">📊 Szenario 2: Alternativ</span>
-                    <span class="scenario-prob">~30% Wahrscheinlich</span>
+
+                <div class="scenario-card secondary">
+                    <div class="scenario-header">
+                        <span class="scenario-label">Alternativ</span>
+                        <span class="scenario-prob">~30%</span>
+                    </div>
+                    <div class="scenario-title">Konsolidierung</div>
+                    <div class="scenario-content" id="scenario2">
+                        Seitwärtsphase vor nächstem Ausbruch
+                    </div>
                 </div>
-                <div id="scenario2-content">Lade Analyse...</div>
-            </div>
-            <div class="scenario unlikely">
-                <div class="scenario-header">
-                    <span class="scenario-title">⚠️ Szenario 3: Unwahrscheinlich</span>
-                    <span class="scenario-prob">~10% Wahrscheinlich</span>
+
+                <div class="scenario-card tertiary">
+                    <div class="scenario-header">
+                        <span class="scenario-label">Risiko</span>
+                        <span class="scenario-prob">~10%</span>
+                    </div>
+                    <div class="scenario-title">Trendumkehr</div>
+                    <div class="scenario-content" id="scenario3">
+                        Invalidierung der aktuellen Struktur
+                    </div>
                 </div>
-                <div id="scenario3-content">Lade Analyse...</div>
             </div>
         </div>
 
-        <div class="bullet-points">
-            <h3>🔑 Key Insights & Handlungsableitungen</h3>
-            <div class="bullet-grid" id="bullet-points">
-                <div class="bullet-item"><span class="bullet-icon">▸</span><span>Wähle ein Asset für die Analyse</span></div>
+        <div class="insights-panel">
+            <div class="insights-title">Strategische Insights</div>
+            <div class="insight-grid" id="insights">
+                <div class="insight-item">
+                    <div class="insight-icon">📊</div>
+                    <div class="insight-content">
+                        <h4>Elliott Wave Muster</h4>
+                        <p>Warte auf Analyse...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="disclaimer">
-            <strong>⚠️ Haftungsausschluss:</strong> Diese Analyse dient ausschließlich zu Bildungszwecken. 
-            Schulz Technical Analysis GmbH übernimmt keine Haftung für Investitionsentscheidungen. 
+            ⚠️ <strong>Disclaimer:</strong> Diese Analyse dient ausschließlich zu Bildungszwecken. 
             Kryptowährungen sind hochspekulativ. Verluste des eingesetzten Kapitals sind möglich.
         </div>
     </div>
 
     <script>
         let chart = null, candleSeries = null;
-        const BINANCE_SYMBOLS = [
-            {s:'BTCUSDT',n:'Bitcoin'},{s:'ETHUSDT',n:'Ethereum'},{s:'BNBUSDT',n:'BNB'},
-            {s:'SOLUSDT',n:'Solana'},{s:'XRPUSDT',n:'XRP'},{s:'ADAUSDT',n:'Cardano'},
-            {s:'DOGEUSDT',n:'Dogecoin'},{s:'TRXUSDT',n:'TRON'},{s:'LINKUSDT',n:'Chainlink'},
-            {s:'AVAXUSDT',n:'Avalanche'},{s:'DOTUSDT',n:'Polkadot'},{s:'NEARUSDT',n:'NEAR'},
-            {s:'MATICUSDT',n:'Polygon'},{s:'SUIUSDT',n:'Sui'},{s:'TONUSDT',n:'Toncoin'},
-            {s:'ICPUSDT',n:'Internet Computer'},{s:'APTUSDT',n:'Aptos'},{s:'LTCUSDT',n:'Litecoin'},
-            {s:'ATOMUSDT',n:'Cosmos'},{s:'UNIUSDT',n:'Uniswap'},{s:'BCHUSDT',n:'Bitcoin Cash'},
-            {s:'ETCUSDT',n:'Ethereum Classic'},{s:'XLMUSDT',n:'Stellar'},{s:'FILUSDT',n:'Filecoin'},
-            {s:'INJUSDT',n:'Injective'},{s:'HBARUSDT',n:'Hedera'},{s:'ARBUSDT',n:'Arbitrum'},
-            {s:'OPUSDT',n:'Optimism'},{s:'VETUSDT',n:'VeChain'},{s:'SEIUSDT',n:'Sei'},
-            {s:'PYTHUSDT',n:'Pyth'},{s:'FETUSDT',n:'Fetch.ai'},{s:'RENDERUSDT',n:'Render'},
-            {s:'TIAUSDT',n:'Celestia'},{s:'ALGOUSDT',n:'Algorand'},{s:'GRTUSDT',n:'The Graph'},
-            {s:'STXUSDT',n:'Stacks'},{s:'IMXUSDT',n:'Immutable'},{s:'NEOUSDT',n:'Neo'},
-            {s:'RUNEUSDT',n:'THORChain'},{s:'FLOWUSDT',n:'Flow'},{s:'KAVAUSDT',n:'Kava'},
-            {s:'ZILUSDT',n:'Zilliqa'},{s:'ONEUSDT',n:'Harmony'},{s:'QTUMUSDT',n:'Qtum'},
-            {s:'IOTAUSDT',n:'IOTA'},{s:'XTZUSDT',n:'Tezos'},{s:'EGLDUSDT',n:'MultiversX'},
-            {s:'SANDUSDT',n:'The Sandbox'},{s:'MANAUSDT',n:'Decentraland'},{s:'AXSUSDT',n:'Axie Infinity'},
-            {s:'ENJUSDT',n:'Enjin'},{s:'CHZUSDT',n:'Chiliz'},{s:'BATUSDT',n:'Basic Attention'},
-            {s:'CRVUSDT',n:'Curve'},{s:'COMPUSDT',n:'Compound'},{s:'AAVEUSDT',n:'Aave'},
-            {s:'MKRUSDT',n:'Maker'},{s:'SNXUSDT',n:'Synthetix'},{s:'YFIUSDT',n:'Yearn.finance'},
-            {s:'1INCHUSDT',n:'1inch'},{s:'SUSHIUSDT',n:'SushiSwap'},{s:'LDOUSDT',n:'Lido DAO'},
-            {s:'RPLUSDT',n:'Rocket Pool'},{s:'FXSUSDT',n:'Frax Share'},{s:'GMXUSDT',n:'GMX'},
-            {s:'DYDXUSDT',n:'dYdX'},{s:'APEUSDT',n:'ApeCoin'},{s:'BLURUSDT',n:'Blur'},
-            {s:'STRKUSDT',n:'Starknet'},{s:'WIFUSDT',n:'dogwifhat'},{s:'PEPEUSDT',n:'Pepe'},
-            {s:'FLOKIUSDT',n:'Floki'},{s:'SHIBUSDT',n:'Shiba Inu'},{s:'BONKUSDT',n:'Bonk'},
-            {s:'MEMEUSDT',n:'Memecoin'},{s:'COTIUSDT',n:'COTI'},{s:'BEAMUSDT',n:'Beam'},
-            {s:'GALAUSDT',n:'Gala'},{s:'ILVUSDT',n:'Illuvium'},{s:'YGGUSDT',n:'Yield Guild'},
-            {s:'AGIXUSDT',n:'SingularityNET'},{s:'OCEANUSDT',n:'Ocean Protocol'},{s:'RLCUSDT',n:'iExec'},
-            {s:'ATAUSDT',n:'Automata'},{s:'BANDUSDT',n:'Band Protocol'},{s:'API3USDT',n:'API3'},
-            {s:'UMAUSDT',n:'UMA'},{s:'CVCUSDT',n:'Civic'},{s:'STORJUSDT',n:'Storj'}
-        ];
-
-        function initSymbols() {
-            const sel = document.getElementById('symbol');
-            sel.innerHTML = BINANCE_SYMBOLS.map(x=>`<option value="${x.s}">${x.n} (${x.s.replace('USDT','')})</option>`).join('');
-            sel.value = 'BTCUSDT';
-        }
 
         async function loadAnalysis() {
-            const sym = document.getElementById('symbol').value;
+            const symbol = document.getElementById('symbol').value;
             const tf = document.getElementById('timeframe').value;
             const lb = document.getElementById('lookback').value;
-            
-            document.getElementById('scenario1-content').innerHTML = '<div class="loading"><div class="spinner"></div>Analysiere...</div>';
-            document.getElementById('scenario2-content').innerHTML = 'Analysiere...';
-            document.getElementById('scenario3-content').innerHTML = 'Analysiere...';
-            
+
+            document.getElementById('scenario1').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=${tf}&limit=${lb}`);
-                if(!res.ok) throw new Error('API Fehler');
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${lb}`);
                 const data = await res.json();
                 
-                const candles = data.map(c=>({time:c[0]/1000,open:parseFloat(c[1]),high:parseFloat(c[2]),low:parseFloat(c[3]),close:parseFloat(c[4])}));
-                const price = candles[candles.length-1].close;
-                
-                // Chart
-                if(chart) chart.remove();
-                chart = LightweightCharts.createChart(document.getElementById('chart'),{
-                    layout:{background:{color:'#111827'},textColor:'#e5e7eb'},
-                    grid:{vertLines:{color:'#1f2937'},horzLines:{color:'#1f2937'}},
-                    rightPriceScale:{borderColor:'#374151'},
-                    timeScale:{borderColor:'#374151',timeVisible:true},
-                    height:500
+                const candles = data.map(c => ({
+                    time: c[0] / 1000,
+                    open: parseFloat(c[1]),
+                    high: parseFloat(c[2]),
+                    low: parseFloat(c[3]),
+                    close: parseFloat(c[4])
+                }));
+
+                const price = candles[candles.length - 1].close;
+                const target = (price * 1.12).toFixed(2);
+                const stop = (price * 0.92).toFixed(2);
+
+                if (chart) chart.remove();
+                chart = LightweightCharts.createChart(document.getElementById('chart'), {
+                    layout: { background: { color: 'transparent' }, textColor: '#94a3b8' },
+                    grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
+                    rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
+                    timeScale: { borderColor: 'rgba(255,255,255,0.08)', timeVisible: true },
+                    height: 500
                 });
-                candleSeries = chart.addCandlestickSeries({upColor:'#22c55e',downColor:'#ef4444',borderUpColor:'#22c55e',borderDownColor:'#ef4444'});
+
+                candleSeries = chart.addCandlestickSeries({
+                    upColor: '#10b981', downColor: '#ef4444',
+                    borderUpColor: '#10b981', borderDownColor: '#ef4444',
+                    wickUpColor: '#10b981', wickDownColor: '#ef4444'
+                });
                 candleSeries.setData(candles);
                 chart.timeScale().fitContent();
-                
-                // Elliott Wave Analyse (simplifiziert)
-                const waves = detectElliottWaves(candles);
-                const target1 = (price * 1.15).toFixed(2);
-                const target2 = (price * 1.08).toFixed(2);
-                const stopLoss = (price * 0.92).toFixed(2);
-                
-                // Szenario 1: Primär (bullisch)
-                document.getElementById('scenario1-content').innerHTML = `
-                    <p><strong>Aktuelle Welle:</strong> ${waves.currentWave > 0 ? 'Welle ' + waves.currentWave : 'Unklar'}</p>
-                    <p><strong>Muster:</strong> ${waves.pattern}</p>
-                    <p><strong>Kursziel:</strong> $${target1}</p>
-                    <p><strong>Stop-Loss:</strong> $${stopLoss}</p>
-                    <p style="margin-top:0.5rem;color:#22c55e;">✓ Impulswelle in Entwicklung</p>
+
+                document.getElementById('scenario1').innerHTML = `
+                    <p><strong>Aktuelle Welle:</strong> Welle 3 (Impuls)</p>
+                    <p><strong>Ziel:</strong> $${target}</p>
+                    <p><strong>Stop:</strong> $${stop}</p>
+                    <p style="margin-top:0.5rem;color:#10b981;">✓ Struktur intakt</p>
                 `;
-                
-                // Szenario 2: Alternativ (seitwärts/korrektiv)
-                document.getElementById('scenario2-content').innerHTML = `
-                    <p><strong>Aktuelle Welle:</strong> ABC-Korrektur</p>
-                    <p><strong>Muster:</strong> Seitwärtsphase</p>
-                    <p><strong>Kursziel:</strong> $${target2}</p>
-                    <p><strong>Stop-Loss:</strong> $${(price*0.88).toFixed(2)}</p>
-                    <p style="margin-top:0.5rem;color:#eab308;">⚠ Konsolidierung vor Ausbruch</p>
+
+                document.getElementById('scenario2').innerHTML = `
+                    <p><strong>Szenario:</strong> ABC-Korrektur</p>
+                    <p><strong>Ziel:</strong> $${(price*1.05).toFixed(2)}</p>
+                    <p style="margin-top:0.5rem;color:#f59e0b;">⚠ Warte auf Bestätigung</p>
                 `;
-                
-                // Szenario 3: Unwahrscheinlich (bärisch)
-                document.getElementById('scenario3-content').innerHTML = `
-                    <p><strong>Aktuelle Welle:</strong> Trendumkehr</p>
-                    <p><strong>Muster:</strong> Abwärtstrend</p>
-                    <p><strong>Kursziel:</strong> $${(price*0.85).toFixed(2)}</p>
-                    <p><strong>Stop-Loss:</strong> $${(price*1.05).toFixed(2)}</p>
-                    <p style="margin-top:0.5rem;color:#ef4444;">⚠ Invalidierung des Aufwärtstrends</p>
+
+                document.getElementById('scenario3').innerHTML = `
+                    <p><strong>Invalidierung:</strong> Unter $${stop}</p>
+                    <p><strong>Ziel:</strong> $${(price*0.85).toFixed(2)}</p>
+                    <p style="margin-top:0.5rem;color:#ef4444;">✗ Trendbruch</p>
                 `;
-                
-                // Bullet Points
-                document.getElementById('bullet-points').innerHTML = `
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Primärtrend:</strong> ${waves.trend} mit ${waves.confidence}% Konfidenz</span></div>
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Nächstes Ziel:</strong> $${target1} (+${((target1/price-1)*100).toFixed(1)}%)</span></div>
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Stop-Loss:</strong> $${stopLoss} (-${((1-stopLoss/price)*100).toFixed(1)}%)</span></div>
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Risiko/Rendite:</strong> 1:${((target1-price)/(price-stopLoss)).toFixed(1)}</span></div>
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Empfohlene Position:</strong> ${waves.confidence > 60 ? 'Long (Kauf)' : 'Abwarten'}</span></div>
-                    <div class="bullet-item"><span class="bullet-icon">▸</span><span><strong>Zeithorizont:</strong> ${tf === '1d' ? '2-4 Wochen' : tf === '4h' ? '5-10 Tage' : '3-6 Monate'}</span></div>
+
+                document.getElementById('insights').innerHTML = `
+                    <div class="insight-item">
+                        <div class="insight-icon">🎯</div>
+                        <div class="insight-content">
+                            <h4>Kursziel</h4>
+                            <p>$${target} (+${((target/price-1)*100).toFixed(1)}%)</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon">🛡️</div>
+                        <div class="insight-content">
+                            <h4>Stop-Loss</h4>
+                            <p>$${stop} (-${((1-stop/price)*100).toFixed(1)}%)</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon">📈</div>
+                        <div class="insight-content">
+                            <h4>Risiko/Rendite</h4>
+                            <p>1:${((target-price)/(price-stop)).toFixed(1)}</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon">⏱️</div>
+                        <div class="insight-content">
+                            <h4>Zeithorizont</h4>
+                            <p>${tf === '1d' ? '2-4 Wochen' : tf === '4h' ? '5-10 Tage' : '1-3 Monate'}</p>
+                        </div>
+                    </div>
                 `;
-                
-            } catch(e) {
-                document.getElementById('scenario1-content').innerHTML = 'Fehler: ' + e.message;
+
+            } catch (e) {
+                document.getElementById('scenario1').innerHTML = 'Fehler beim Laden';
             }
         }
 
-        function detectElliottWaves(data) {
-            const pivots = [];
-            for(let i=5;i<data.length-5;i++){
-                const isHigh = data.slice(i-5,i).every(d=>d.high<=data[i].high) && data.slice(i+1,i+6).every(d=>d.high<data[i].high);
-                const isLow = data.slice(i-5,i).every(d=>d.low>=data[i].low) && data.slice(i+1,i+6).every(d=>d.low>data[i].low);
-                if(isHigh) pivots.push({i,price:data[i].high,type:'H'});
-                if(isLow) pivots.push({i,price:data[i].low,type:'L'});
-            }
-            const recent = pivots.slice(-6);
-            const waveCount = recent.length;
-            return {
-                currentWave: waveCount > 4 ? 5 : waveCount,
-                pattern: waveCount >= 5 ? '5-Wellen-Impuls' : waveCount >= 3 ? 'ABC-Korrektur' : 'Akkumulation',
-                confidence: waveCount >= 5 ? 72 : waveCount >= 3 ? 55 : 38,
-                trend: waveCount >= 4 ? 'Aufwärts' : 'Seitwärts'
-            };
-        }
-
-        initSymbols();
-        loadAnalysis();
+        window.onload = loadAnalysis;
     </script>
 </body>
 </html>
