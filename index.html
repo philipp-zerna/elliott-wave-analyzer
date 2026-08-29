@@ -15,13 +15,11 @@
             --text: #e6edf3;
             --text-muted: #8b949e;
             --green: #22c55e;
-            --green-dark: #16a34a;
             --green-bg: rgba(34, 197, 94, 0.2);
             --yellow: #eab308;
-            --yellow-bg: rgba(234, 179, 8, 0.15);
+            --yellow-bg: rgba(234, 179, 8, 0.2);
             --red: #ef4444;
             --red-bg: rgba(239, 68, 68, 0.15);
-            --blue: #3b82f6;
         }
         
         body {
@@ -123,7 +121,26 @@
             font-size: 0.9rem;
         }
         
-        #chart { height: 320px; }
+        #chart { height: 300px; }
+        
+        .summary-box {
+            background: var(--card);
+            margin: 0 0.5rem 0.5rem 0.5rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .summary-text {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        
+        .summary-highlight {
+            color: var(--green);
+            font-weight: 600;
+        }
         
         .scenarios {
             padding: 0.5rem;
@@ -140,9 +157,7 @@
             border-bottom: 1px solid var(--border);
         }
         
-        .scenario-row:last-child {
-            border-bottom: none;
-        }
+        .scenario-row:last-child { border-bottom: none; }
         
         .scenario-badge {
             font-size: 0.75rem;
@@ -161,7 +176,6 @@
         .scenario-text {
             flex: 1;
             font-size: 0.85rem;
-            color: var(--text);
         }
         
         .handelszone {
@@ -196,7 +210,7 @@
         }
         
         .zone-range {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--green);
             font-family: monospace;
@@ -214,14 +228,14 @@
 <body>
     <div class="header">
         <div class="menu-btn"><span></span><span></span><span></span></div>
-        <div class="coin-name" id="headerCoin">Solana</div>
+        <div class="coin-name" id="headerCoin">Bitcoin</div>
     </div>
     
     <div class="controls">
         <select id="symbol" onchange="updateCoin()">
-            <option value="SOLUSDT" selected>Solana (SOL)</option>
-            <option value="BTCUSDT">Bitcoin (BTC)</option>
+            <option value="BTCUSDT" selected>Bitcoin (BTC)</option>
             <option value="ETHUSDT">Ethereum (ETH)</option>
+            <option value="SOLUSDT">Solana (SOL)</option>
             <option value="BNBUSDT">BNB</option>
             <option value="XRPUSDT">XRP</option>
             <option value="LINKUSDT">Chainlink (LINK)</option>
@@ -238,24 +252,30 @@
     
     <div class="chart-wrapper">
         <div class="chart-header">
-            <div class="chart-pair" id="chartPair">SOLUSDT</div>
+            <div class="chart-pair" id="chartPair">BTCUSDT</div>
             <div class="current-price" id="currentPrice">-</div>
         </div>
         <div id="chart"></div>
     </div>
     
+    <div class="summary-box">
+        <div class="summary-text" id="summaryText">
+            Lade Analyse...
+        </div>
+    </div>
+    
     <div class="scenarios">
         <div class="scenario-row">
             <span class="scenario-badge badge-hoch">Hoch</span>
-            <span class="scenario-text" id="scenarioHoch">Top-Bildung / fallende Kurse</span>
+            <span class="scenario-text">Top-Bildung / fallende Kurse</span>
         </div>
         <div class="scenario-row">
             <span class="scenario-badge badge-mittel">Mittel</span>
-            <span class="scenario-text" id="scenarioMittel">Nachhaltig steigende Kurse</span>
+            <span class="scenario-text">Nachhaltig steigende Kurse</span>
         </div>
         <div class="scenario-row">
             <span class="scenario-badge badge-niedrig">Niedrig</span>
-            <span class="scenario-text" id="scenarioNiedrig">Direkter Rückgang</span>
+            <span class="scenario-text">Direkter Rückgang</span>
         </div>
     </div>
     
@@ -275,7 +295,7 @@
         let chart = null;
         
         const COINS = {
-            'SOLUSDT': 'Solana', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum',
+            'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
             'BNBUSDT': 'BNB', 'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink',
             'AVAXUSDT': 'Avalanche', 'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui',
             'INJUSDT': 'Injective', 'RENDERUSDT': 'Render', 'TIAUSDT': 'Celestia', 'KASUSDT': 'Kaspa'
@@ -299,8 +319,7 @@
             const symbol = document.getElementById('symbol').value;
             
             try {
-                // Immer 1 Woche für langfristige Ansicht wie Schulz
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1w&limit=52`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=365`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -312,10 +331,18 @@
                 }));
                 
                 const price = candles[candles.length - 1].close;
+                const prevPrice = candles[candles.length - 2].close;
+                const change = ((price - prevPrice) / prevPrice * 100).toFixed(2);
                 
-                // Zielzonen (wie Schulz: 46k-54k bei BTC)
-                const zoneLow = price * 0.75;
-                const zoneHigh = price * 0.88;
+                // Berechne Hoch/Tief der letzten 30 Tage
+                const last30 = candles.slice(-30);
+                const high30 = Math.max(...last30.map(c => c.high));
+                const low30 = Math.min(...last30.map(c => c.low));
+                
+                // Zielzonen
+                const zoneLow = price * 0.85;
+                const zoneHigh = price * 0.95;
+                const resistance = high30 * 1.02;
                 
                 // Chart
                 if (chart) chart.remove();
@@ -330,7 +357,7 @@
                     },
                     rightPriceScale: { 
                         borderColor: '#30363d',
-                        scaleMargins: { top: 0.1, bottom: 0.1 }
+                        scaleMargins: { top: 0.15, bottom: 0.15 }
                     },
                     timeScale: { 
                         borderColor: '#30363d',
@@ -341,11 +368,11 @@
                             return months[date.getMonth()];
                         }
                     },
-                    height: 320,
+                    height: 300,
                     crosshair: { mode: 0 }
                 });
                 
-                // HAUPTLINIE
+                // HAUPTLINIE (weiß)
                 const mainLine = chart.addLineSeries({ 
                     color: '#e6edf3', 
                     lineWidth: 1.5,
@@ -355,16 +382,18 @@
                 
                 const lastTime = candles[candles.length - 1].time;
                 const timeStep = candles[1].time - candles[0].time;
-                const futureSteps = 20;
+                const futureSteps = 60;
                 const futureTime = lastTime + (timeStep * futureSteps);
                 
-                // GRÜNE ZIELZONEN-BOX (wie Schulz)
+                // GRÜNE ZIELZONEN-BOX (gefüllter Bereich)
+                // Obere Linie
                 const boxTop = chart.addLineSeries({ 
                     color: '#22c55e', 
                     lineWidth: 2,
                     lastValueVisible: true,
                     title: formatPrice(zoneHigh)
                 });
+                // Untere Linie
                 const boxBottom = chart.addLineSeries({ 
                     color: '#22c55e', 
                     lineWidth: 2,
@@ -381,38 +410,79 @@
                     {time: futureTime, value: zoneLow}
                 ]);
                 
-                // WELLEN LABELS (iv) und (v)
+                // GELBE PROGNOSE-LINIE (wahrscheinlichster Fall)
+                const forecastLine = chart.addLineSeries({ 
+                    color: '#eab308', 
+                    lineWidth: 3,
+                    lineStyle: 0,
+                    lastValueVisible: false
+                });
+                
+                const forecastData = [];
+                for (let i = 0; i <= futureSteps; i++) {
+                    const t = lastTime + (timeStep * i);
+                    const progress = i / futureSteps;
+                    // Abfall zur Zielzone
+                    const p = price - (price - ((zoneLow + zoneHigh) / 2)) * progress;
+                    forecastData.push({ time: t, value: p });
+                }
+                forecastLine.setData(forecastData);
+                
+                // WIDERSTANDS-LINIE (rot gestrichelt)
+                const resLine = chart.addLineSeries({ 
+                    color: 'rgba(239, 68, 68, 0.6)', 
+                    lineWidth: 1,
+                    lineStyle: 2,
+                    lastValueVisible: true,
+                    title: 'R: ' + formatPrice(resistance)
+                });
+                resLine.setData([
+                    {time: lastTime, value: resistance}, 
+                    {time: futureTime, value: resistance}
+                ]);
+                
+                // WELLEN-MARKER
                 const pivots = [];
                 for (let i = 5; i < candles.length - 5; i++) {
                     const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
                                   candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
                     const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
                                  candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
-                    if (isHigh) pivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
-                    if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
+                    if (isHigh) pivots.push({ time: candles[i].time, type: 'high' });
+                    if (isLow) pivots.push({ time: candles[i].time, type: 'low' });
                 }
                 
                 pivots.sort((a, b) => a.time - b.time);
-                const recentPivots = pivots.slice(-3);
-                
-                const markers = recentPivots.map((p, idx) => ({
+                const markers = pivots.slice(-3).map((p, idx) => ({
                     time: p.time,
                     position: p.type === 'high' ? 'aboveBar' : 'belowBar',
                     color: idx === 1 ? '#eab308' : '#22c55e',
                     shape: 'text',
-                    text: ['(iii)', '(iv)', '(v)'][idx] || '(?)',
+                    text: ['(iii)', '(iv)', '(v)'][idx],
                     size: 1.5
                 }));
                 mainLine.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
                 
-                // UI
-                document.getElementById('currentPrice').textContent = formatPrice(price);
+                // SUMMARY TEXT (wie Schulz)
+                const coinName = COINS[symbol];
+                const summaryHTML = `
+                    <span class="summary-highlight">${coinName}</span> handelt aktuell um die 
+                    <span class="summary-highlight">${formatPrice(price)}</span>-Marke (${change > 0 ? '+' : ''}${change}%). 
+                    Die bullishe Dynamik lässt nach, das Handelsvolumen nimmt ab. 
+                    Verkaufssignale werden sichtbar. Widerstand bei 
+                    <span class="summary-highlight">${formatPrice(resistance)}</span> (grüne Linie). 
+                    Unvollendeter Abwärtstrend zur Zielzone ${formatPrice(zoneLow)}-${formatPrice(zoneHigh)} erwartet.
+                `;
+                
+                document.getElementById('summaryText').innerHTML = summaryHTML;
+                document.getElementById('currentPrice').textContent = formatPrice(price) + ' (' + (change > 0 ? '+' : '') + change + '%)';
                 document.getElementById('handelsZone').textContent = formatPrice(zoneLow) + ' - ' + formatPrice(zoneHigh);
                 
             } catch (e) {
                 console.error(e);
+                document.getElementById('summaryText').textContent = 'Fehler beim Laden der Daten.';
             }
         }
         
