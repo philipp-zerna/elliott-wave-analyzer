@@ -21,6 +21,7 @@
             --yellow-bg: rgba(234, 179, 8, 0.15);
             --red: #ef4444;
             --red-bg: rgba(239, 68, 68, 0.15);
+            --blue: #3b82f6;
         }
         
         body {
@@ -118,7 +119,7 @@
             font-size: 0.95rem;
         }
         
-        #chart { height: 300px; }
+        #chart { height: 350px; }
         
         .bottom-zones {
             display: flex;
@@ -180,7 +181,7 @@
 <body>
     <div class="header">
         <div class="menu-btn"><span></span><span></span><span></span></div>
-        <div class="coin-name" id="headerCoin">Solana</div>
+        <div class="coin-name" id="headerCoin">Bitcoin</div>
     </div>
     
     <div class="controls">
@@ -198,7 +199,6 @@
             <option value="RENDERUSDT">Render</option>
             <option value="TIAUSDT">Celestia</option>
             <option value="KASUSDT">Kaspa (KAS)</option>
-            <option value="BTCUSDT">BTC</option>
         </select>
         <select id="timeframe" onchange="analyze()">
             <option value="4h">4 Stunden</option>
@@ -210,7 +210,7 @@
     
     <div class="chart-wrapper">
         <div class="chart-header">
-            <div class="chart-pair" id="chartPair">SOLUSDT</div>
+            <div class="chart-pair" id="chartPair">BTCUSDT</div>
             <div class="current-price" id="currentPrice">-</div>
         </div>
         <div id="chart"></div>
@@ -308,11 +308,41 @@
                             return months[date.getMonth()];
                         }
                     },
-                    height: 300,
+                    height: 350,
                     crosshair: { mode: 0 }
                 });
                 
-                // HAUPTLINIE - weiß
+                // ZIELZONEN-BOX (grüner Bereich) mit Background Series
+                const zielBoxTop = zielMax;
+                const zielBoxBottom = zielMin;
+                
+                // GRÜNE BOX im Chart (als Hintergrund)
+                const boxDataTop = [];
+                const boxDataBottom = [];
+                const lastTime = candles[candles.length - 1].time;
+                const timeStep = candles[1].time - candles[0].time;
+                const futureSteps = 50;
+                const futureTime = lastTime + (timeStep * futureSteps);
+                
+                for (let i = 0; i <= futureSteps; i++) {
+                    const t = lastTime + (timeStep * i);
+                    boxDataTop.push({ time: t, value: zielBoxTop });
+                    boxDataBottom.push({ time: t, value: zielBoxBottom });
+                }
+                
+                // Box-Bereich füllen
+                const boxTopLine = chart.addLineSeries({ 
+                    color: 'rgba(34, 197, 94, 0.3)', 
+                    lineWidth: 0,
+                    lastValueVisible: false
+                });
+                const boxBottomLine = chart.addLineSeries({ 
+                    color: 'rgba(34, 197, 94, 0.3)', 
+                    lineWidth: 0,
+                    lastValueVisible: false
+                });
+                
+                // HAUPTLINIE
                 const mainLine = chart.addLineSeries({ 
                     color: '#ffffff', 
                     lineWidth: 1.5,
@@ -320,103 +350,113 @@
                 });
                 mainLine.setData(candles.map(c => ({ time: c.time, value: c.close })));
                 
-                const lastTime = candles[candles.length - 1].time;
-                const timeStep = candles[1].time - candles[0].time;
-                const futureSteps = 40;
-                const futureTime = lastTime + (timeStep * futureSteps);
-                
-                // GRÜNE ZIELZONEN-BOX (im Chart als Band)
-                const zielTop = chart.addLineSeries({ 
-                    color: 'rgba(34, 197, 94, 0.8)', 
+                // ZIELZONE OBEN (Linie mit Label)
+                const zielTopLine = chart.addLineSeries({ 
+                    color: '#22c55e', 
                     lineWidth: 2,
+                    lineStyle: 0,
                     lastValueVisible: true,
-                    title: 'Ziel'
+                    title: '$' + formatPrice(zielMax)
                 });
-                const zielBottom = chart.addLineSeries({ 
-                    color: 'rgba(34, 197, 94, 0.4)', 
-                    lineWidth: 1,
-                    lineStyle: 2,
-                    lastValueVisible: false
-                });
-                
-                zielTop.setData([
+                zielTopLine.setData([
                     {time: lastTime, value: zielMax}, 
                     {time: futureTime, value: zielMax}
                 ]);
-                zielBottom.setData([
+                
+                // ZIELZONE UNTEN (Linie)
+                const zielBottomLine = chart.addLineSeries({ 
+                    color: 'rgba(34, 197, 94, 0.6)', 
+                    lineWidth: 1,
+                    lineStyle: 2,
+                    lastValueVisible: true,
+                    title: '$' + formatPrice(zielMin)
+                });
+                zielBottomLine.setData([
                     {time: lastTime, value: zielMin}, 
                     {time: futureTime, value: zielMin}
                 ]);
                 
-                // GELBE DURCHGEZOGENE LINIE = Wahrscheinlichster Fall
+                // GELBE DURCHGEZOGENE HAUPTLINIE
                 const primaryLine = chart.addLineSeries({ 
                     color: '#eab308', 
-                    lineWidth: 2.5,
-                    lineStyle: 0, // durchgezogen
-                    lastValueVisible: false
-                });
-                
-                // GRÜNE GESTRICHELTE LINIE = Alternativ
-                const secondaryLine = chart.addLineSeries({ 
-                    color: '#22c55e', 
-                    lineWidth: 2,
-                    lineStyle: 2, // gestrichelt
-                    lastValueVisible: false
+                    lineWidth: 3,
+                    lineStyle: 0,
+                    lastValueVisible: true,
+                    title: 'Wahrscheinlich'
                 });
                 
                 const primaryData = [];
-                const secondaryData = [];
-                
                 for (let i = 0; i <= futureSteps; i++) {
                     const t = lastTime + (timeStep * i);
                     const progress = i / futureSteps;
-                    // Gelbe Linie: Zum Ziel
-                    const p1 = price + (erwartung - price) * progress;
-                    // Grüne Linie: Konservativer
-                    const p2 = price + (zielMin - price) * progress;
-                    primaryData.push({ time: t, value: p1 });
-                    secondaryData.push({ time: t, value: p2 });
+                    const p = price + (erwartung - price) * progress;
+                    primaryData.push({ time: t, value: p });
                 }
-                
                 primaryLine.setData(primaryData);
-                secondaryLine.setData(secondaryData);
                 
                 // STOP LOSS
                 const stopLine = chart.addLineSeries({ 
-                    color: 'rgba(239, 68, 68, 0.5)', 
+                    color: 'rgba(239, 68, 68, 0.6)', 
                     lineWidth: 1,
                     lineStyle: 2,
-                    lastValueVisible: true
+                    lastValueVisible: true,
+                    title: 'Stop'
                 });
                 stopLine.setData([
                     {time: lastTime, value: stop}, 
                     {time: futureTime, value: stop}
                 ]);
                 
-                // WELLEN (i) bis (v)
-                const pivots = [];
+                // ÜBERGEORDNETE WELLENZÄHLUNGEN (große Zahlen)
+                const wavePivots = [];
+                for (let i = 10; i < candles.length - 10; i++) {
+                    const isHigh = candles.slice(i-10, i).every(d => d.high <= candles[i].high) &&
+                                  candles.slice(i+1, i+11).every(d => d.high < candles[i].high);
+                    const isLow = candles.slice(i-10, i).every(d => d.low >= candles[i].low) &&
+                                 candles.slice(i+1, i+11).every(d => d.low > candles[i].low);
+                    if (isHigh && wavePivots.filter(p => p.type === 'high').length < 3) {
+                        wavePivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
+                    }
+                    if (isLow && wavePivots.filter(p => p.type === 'low').length < 2) {
+                        wavePivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
+                    }
+                }
+                
+                // Sortieren nach Zeit
+                wavePivots.sort((a, b) => a.time - b.time);
+                
+                // Große Wellen-Marker (1, 2, 3, 4, 5)
+                const waveMarkers = wavePivots.slice(0, 5).map((p, idx) => ({
+                    time: p.time,
+                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
+                    color: idx === 2 ? '#eab308' : '#3b82f6',
+                    shape: 'text',
+                    text: (idx + 1).toString(),
+                    size: 2
+                }));
+                
+                // Kleine Wellen (i, ii, iii, iv, v)
+                const subPivots = [];
                 for (let i = 5; i < candles.length - 5; i++) {
                     const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
                                   candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
                     const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
                                  candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
-                    if (isHigh) pivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
-                    if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
+                    if (isHigh) subPivots.push({ time: candles[i].time, type: 'high' });
+                    if (isLow) subPivots.push({ time: candles[i].time, type: 'low' });
                 }
                 
-                // Sortiere nach Zeit und nimm die letzten 5
-                pivots.sort((a, b) => a.time - b.time);
-                const recentPivots = pivots.slice(-5);
-                
-                const markers = recentPivots.map((p, idx) => ({
+                subPivots.sort((a, b) => a.time - b.time);
+                const subMarkers = subPivots.slice(-5).map((p, idx) => ({
                     time: p.time,
                     position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                    color: p.type === 'high' ? '#eab308' : '#22c55e',
+                    color: '#6b7280',
                     shape: 'text',
                     text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)'][idx],
-                    size: 1.5
+                    size: 1
                 }));
-                mainLine.setMarkers(markers);
+                
+                mainLine.setMarkers([...waveMarkers, ...subMarkers]);
                 
                 chart.timeScale().fitContent();
                 
