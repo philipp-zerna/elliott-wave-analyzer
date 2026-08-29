@@ -9,14 +9,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg: #0a0b0f;
-            --card: #111218;
-            --border: #1f2129;
-            --text: #ffffff;
-            --text-muted: #6b7280;
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
             --green: #22c55e;
             --green-dark: #16a34a;
-            --green-bg: rgba(34, 197, 94, 0.15);
+            --green-bg: rgba(34, 197, 94, 0.2);
             --yellow: #eab308;
             --yellow-bg: rgba(234, 179, 8, 0.15);
             --red: #ef4444;
@@ -62,22 +62,26 @@
             gap: 0.5rem;
             background: var(--card);
             border-bottom: 1px solid var(--border);
-            overflow-x: auto;
         }
         
-        .controls select, .controls button {
+        .controls select {
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--text);
             padding: 0.4rem 0.6rem;
             border-radius: 6px;
             font-size: 0.8rem;
+            flex: 1;
         }
         
         .analyze-btn {
-            background: var(--green) !important;
-            border-color: var(--green) !important;
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
             font-weight: 600;
+            font-size: 0.8rem;
         }
         
         .chart-wrapper {
@@ -116,79 +120,108 @@
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
         
-        #chart { height: 350px; }
+        #chart { height: 320px; }
         
-        .bottom-zones {
-            display: flex;
-            gap: 0.5rem;
+        .scenarios {
             padding: 0.5rem;
             background: var(--card);
-            margin: 0 0.5rem 0.5rem 0.5rem;
+            margin: 0 0.5rem;
             border-radius: 12px;
             border: 1px solid var(--border);
         }
         
-        .bottom-zone {
-            flex: 1;
-            padding: 0.75rem 0.5rem;
-            border-radius: 10px;
+        .scenario-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .scenario-row:last-child {
+            border-bottom: none;
+        }
+        
+        .scenario-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            min-width: 70px;
             text-align: center;
         }
         
-        .zone-green {
-            background: linear-gradient(135deg, var(--green-bg), rgba(34, 197, 94, 0.05));
-            border: 1px solid rgba(34, 197, 94, 0.3);
+        .badge-hoch { background: var(--green-bg); color: var(--green); }
+        .badge-mittel { background: var(--yellow-bg); color: var(--yellow); }
+        .badge-niedrig { background: var(--red-bg); color: var(--red); }
+        
+        .scenario-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text);
         }
         
-        .zone-yellow {
-            background: linear-gradient(135deg, var(--yellow-bg), rgba(234, 179, 8, 0.05));
-            border: 1px solid rgba(234, 179, 8, 0.3);
+        .handelszone {
+            background: var(--card);
+            margin: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
         }
         
-        .zone-red {
-            background: linear-gradient(135deg, var(--red-bg), rgba(239, 68, 68, 0.05));
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .zone-label {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 0.25rem;
-        }
-        
-        .zone-value {
-            font-size: 0.95rem;
+        .handelszone-header {
+            padding: 0.6rem 0.75rem;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
             font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .handelszone-content {
+            padding: 0.75rem;
+        }
+        
+        .position-badge {
+            display: inline-block;
+            background: var(--green);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .zone-range {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--green);
             font-family: monospace;
         }
-        
-        .zone-green .zone-value { color: var(--green); }
-        .zone-yellow .zone-value { color: var(--yellow); }
-        .zone-red .zone-value { color: var(--red); }
         
         .disclaimer {
             padding: 0.75rem;
             font-size: 0.7rem;
             color: var(--text-muted);
             text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="menu-btn"><span></span><span></span><span></span></div>
-        <div class="coin-name" id="headerCoin">Bitcoin</div>
+        <div class="coin-name" id="headerCoin">Solana</div>
     </div>
     
     <div class="controls">
         <select id="symbol" onchange="updateCoin()">
-            <option value="BTCUSDT" selected>Bitcoin (BTC)</option>
+            <option value="SOLUSDT" selected>Solana (SOL)</option>
+            <option value="BTCUSDT">Bitcoin (BTC)</option>
             <option value="ETHUSDT">Ethereum (ETH)</option>
-            <option value="SOLUSDT">Solana (SOL)</option>
             <option value="BNBUSDT">BNB</option>
             <option value="XRPUSDT">XRP</option>
             <option value="LINKUSDT">Chainlink (LINK)</option>
@@ -200,34 +233,37 @@
             <option value="TIAUSDT">Celestia</option>
             <option value="KASUSDT">Kaspa (KAS)</option>
         </select>
-        <select id="timeframe" onchange="analyze()">
-            <option value="4h">4 Stunden</option>
-            <option value="1d" selected>1 Tag</option>
-            <option value="1w">1 Woche</option>
-        </select>
         <button class="analyze-btn" onclick="analyze()">Analysieren</button>
     </div>
     
     <div class="chart-wrapper">
         <div class="chart-header">
-            <div class="chart-pair" id="chartPair">BTCUSDT</div>
+            <div class="chart-pair" id="chartPair">SOLUSDT</div>
             <div class="current-price" id="currentPrice">-</div>
         </div>
         <div id="chart"></div>
     </div>
     
-    <div class="bottom-zones">
-        <div class="bottom-zone zone-green">
-            <div class="zone-label">Zielzone</div>
-            <div class="zone-value" id="zielZone">-</div>
+    <div class="scenarios">
+        <div class="scenario-row">
+            <span class="scenario-badge badge-hoch">Hoch</span>
+            <span class="scenario-text" id="scenarioHoch">Top-Bildung / fallende Kurse</span>
         </div>
-        <div class="bottom-zone zone-yellow">
-            <div class="zone-label">Erwartungswert</div>
-            <div class="zone-value" id="erwartungsWert">-</div>
+        <div class="scenario-row">
+            <span class="scenario-badge badge-mittel">Mittel</span>
+            <span class="scenario-text" id="scenarioMittel">Nachhaltig steigende Kurse</span>
         </div>
-        <div class="bottom-zone zone-red">
-            <div class="zone-label">Stop Loss</div>
-            <div class="zone-value" id="stopLoss">-</div>
+        <div class="scenario-row">
+            <span class="scenario-badge badge-niedrig">Niedrig</span>
+            <span class="scenario-text" id="scenarioNiedrig">Direkter Rückgang</span>
+        </div>
+    </div>
+    
+    <div class="handelszone">
+        <div class="handelszone-header">📊 Handelszone</div>
+        <div class="handelszone-content">
+            <span class="position-badge">LONG</span>
+            <div class="zone-range" id="handelsZone">-</div>
         </div>
     </div>
     
@@ -239,7 +275,7 @@
         let chart = null;
         
         const COINS = {
-            'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana',
+            'SOLUSDT': 'Solana', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum',
             'BNBUSDT': 'BNB', 'XRPUSDT': 'XRP', 'LINKUSDT': 'Chainlink',
             'AVAXUSDT': 'Avalanche', 'NEARUSDT': 'NEAR', 'SUIUSDT': 'Sui',
             'INJUSDT': 'Injective', 'RENDERUSDT': 'Render', 'TIAUSDT': 'Celestia', 'KASUSDT': 'Kaspa'
@@ -252,20 +288,19 @@
         }
         
         function formatPrice(price) {
-            if (price >= 10000) return Math.round(price).toLocaleString('de-DE');
-            if (price >= 1000) return Math.round(price).toLocaleString('de-DE');
-            if (price >= 100) return price.toFixed(2);
-            if (price >= 1) return price.toFixed(3);
-            return price.toFixed(5);
+            if (price >= 10000) return '$' + Math.round(price).toLocaleString('de-DE');
+            if (price >= 1000) return '$' + Math.round(price).toLocaleString('de-DE');
+            if (price >= 100) return '$' + price.toFixed(2);
+            if (price >= 1) return '$' + price.toFixed(3);
+            return '$' + price.toFixed(5);
         }
         
         async function analyze() {
             const symbol = document.getElementById('symbol').value;
-            const tf = document.getElementById('timeframe').value;
-            const limit = tf === '1w' ? 104 : tf === '1d' ? 365 : 500;
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${tf}&limit=${limit}`);
+                // Immer 1 Woche für langfristige Ansicht wie Schulz
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1w&limit=52`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -278,29 +313,27 @@
                 
                 const price = candles[candles.length - 1].close;
                 
-                // Berechnungen
-                const zielMin = price * 1.12;
-                const zielMax = price * 1.20;
-                const erwartung = (zielMin + zielMax) / 2;
-                const stop = price * 0.92;
+                // Zielzonen (wie Schulz: 46k-54k bei BTC)
+                const zoneLow = price * 0.75;
+                const zoneHigh = price * 0.88;
                 
                 // Chart
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
                     layout: { 
-                        background: { color: '#111218' }, 
-                        textColor: '#6b7280'
+                        background: { color: '#161b22' }, 
+                        textColor: '#8b949e'
                     },
                     grid: { 
-                        vertLines: { color: 'rgba(255,255,255,0.05)' }, 
-                        horzLines: { color: 'rgba(255,255,255,0.05)' } 
+                        vertLines: { color: 'rgba(48, 54, 61, 0.5)' }, 
+                        horzLines: { color: 'rgba(48, 54, 61, 0.5)' } 
                     },
                     rightPriceScale: { 
-                        borderColor: '#1f2129',
+                        borderColor: '#30363d',
                         scaleMargins: { top: 0.1, bottom: 0.1 }
                     },
                     timeScale: { 
-                        borderColor: '#1f2129',
+                        borderColor: '#30363d',
                         timeVisible: false,
                         tickMarkFormatter: (time) => {
                             const date = new Date(time * 1000);
@@ -308,163 +341,75 @@
                             return months[date.getMonth()];
                         }
                     },
-                    height: 350,
+                    height: 320,
                     crosshair: { mode: 0 }
-                });
-                
-                // ZIELZONEN-BOX (grüner Bereich) mit Background Series
-                const zielBoxTop = zielMax;
-                const zielBoxBottom = zielMin;
-                
-                // GRÜNE BOX im Chart (als Hintergrund)
-                const boxDataTop = [];
-                const boxDataBottom = [];
-                const lastTime = candles[candles.length - 1].time;
-                const timeStep = candles[1].time - candles[0].time;
-                const futureSteps = 50;
-                const futureTime = lastTime + (timeStep * futureSteps);
-                
-                for (let i = 0; i <= futureSteps; i++) {
-                    const t = lastTime + (timeStep * i);
-                    boxDataTop.push({ time: t, value: zielBoxTop });
-                    boxDataBottom.push({ time: t, value: zielBoxBottom });
-                }
-                
-                // Box-Bereich füllen
-                const boxTopLine = chart.addLineSeries({ 
-                    color: 'rgba(34, 197, 94, 0.3)', 
-                    lineWidth: 0,
-                    lastValueVisible: false
-                });
-                const boxBottomLine = chart.addLineSeries({ 
-                    color: 'rgba(34, 197, 94, 0.3)', 
-                    lineWidth: 0,
-                    lastValueVisible: false
                 });
                 
                 // HAUPTLINIE
                 const mainLine = chart.addLineSeries({ 
-                    color: '#ffffff', 
+                    color: '#e6edf3', 
                     lineWidth: 1.5,
                     lastValueVisible: false
                 });
                 mainLine.setData(candles.map(c => ({ time: c.time, value: c.close })));
                 
-                // ZIELZONE OBEN (Linie mit Label)
-                const zielTopLine = chart.addLineSeries({ 
+                const lastTime = candles[candles.length - 1].time;
+                const timeStep = candles[1].time - candles[0].time;
+                const futureSteps = 20;
+                const futureTime = lastTime + (timeStep * futureSteps);
+                
+                // GRÜNE ZIELZONEN-BOX (wie Schulz)
+                const boxTop = chart.addLineSeries({ 
                     color: '#22c55e', 
                     lineWidth: 2,
-                    lineStyle: 0,
                     lastValueVisible: true,
-                    title: '$' + formatPrice(zielMax)
+                    title: formatPrice(zoneHigh)
                 });
-                zielTopLine.setData([
-                    {time: lastTime, value: zielMax}, 
-                    {time: futureTime, value: zielMax}
+                const boxBottom = chart.addLineSeries({ 
+                    color: '#22c55e', 
+                    lineWidth: 2,
+                    lastValueVisible: true,
+                    title: formatPrice(zoneLow)
+                });
+                
+                boxTop.setData([
+                    {time: lastTime, value: zoneHigh}, 
+                    {time: futureTime, value: zoneHigh}
+                ]);
+                boxBottom.setData([
+                    {time: lastTime, value: zoneLow}, 
+                    {time: futureTime, value: zoneLow}
                 ]);
                 
-                // ZIELZONE UNTEN (Linie)
-                const zielBottomLine = chart.addLineSeries({ 
-                    color: 'rgba(34, 197, 94, 0.6)', 
-                    lineWidth: 1,
-                    lineStyle: 2,
-                    lastValueVisible: true,
-                    title: '$' + formatPrice(zielMin)
-                });
-                zielBottomLine.setData([
-                    {time: lastTime, value: zielMin}, 
-                    {time: futureTime, value: zielMin}
-                ]);
-                
-                // GELBE DURCHGEZOGENE HAUPTLINIE
-                const primaryLine = chart.addLineSeries({ 
-                    color: '#eab308', 
-                    lineWidth: 3,
-                    lineStyle: 0,
-                    lastValueVisible: true,
-                    title: 'Wahrscheinlich'
-                });
-                
-                const primaryData = [];
-                for (let i = 0; i <= futureSteps; i++) {
-                    const t = lastTime + (timeStep * i);
-                    const progress = i / futureSteps;
-                    const p = price + (erwartung - price) * progress;
-                    primaryData.push({ time: t, value: p });
-                }
-                primaryLine.setData(primaryData);
-                
-                // STOP LOSS
-                const stopLine = chart.addLineSeries({ 
-                    color: 'rgba(239, 68, 68, 0.6)', 
-                    lineWidth: 1,
-                    lineStyle: 2,
-                    lastValueVisible: true,
-                    title: 'Stop'
-                });
-                stopLine.setData([
-                    {time: lastTime, value: stop}, 
-                    {time: futureTime, value: stop}
-                ]);
-                
-                // ÜBERGEORDNETE WELLENZÄHLUNGEN (große Zahlen)
-                const wavePivots = [];
-                for (let i = 10; i < candles.length - 10; i++) {
-                    const isHigh = candles.slice(i-10, i).every(d => d.high <= candles[i].high) &&
-                                  candles.slice(i+1, i+11).every(d => d.high < candles[i].high);
-                    const isLow = candles.slice(i-10, i).every(d => d.low >= candles[i].low) &&
-                                 candles.slice(i+1, i+11).every(d => d.low > candles[i].low);
-                    if (isHigh && wavePivots.filter(p => p.type === 'high').length < 3) {
-                        wavePivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
-                    }
-                    if (isLow && wavePivots.filter(p => p.type === 'low').length < 2) {
-                        wavePivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
-                    }
-                }
-                
-                // Sortieren nach Zeit
-                wavePivots.sort((a, b) => a.time - b.time);
-                
-                // Große Wellen-Marker (1, 2, 3, 4, 5)
-                const waveMarkers = wavePivots.slice(0, 5).map((p, idx) => ({
-                    time: p.time,
-                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                    color: idx === 2 ? '#eab308' : '#3b82f6',
-                    shape: 'text',
-                    text: (idx + 1).toString(),
-                    size: 2
-                }));
-                
-                // Kleine Wellen (i, ii, iii, iv, v)
-                const subPivots = [];
+                // WELLEN LABELS (iv) und (v)
+                const pivots = [];
                 for (let i = 5; i < candles.length - 5; i++) {
                     const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
                                   candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
                     const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
                                  candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
-                    if (isHigh) subPivots.push({ time: candles[i].time, type: 'high' });
-                    if (isLow) subPivots.push({ time: candles[i].time, type: 'low' });
+                    if (isHigh) pivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
+                    if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
                 }
                 
-                subPivots.sort((a, b) => a.time - b.time);
-                const subMarkers = subPivots.slice(-5).map((p, idx) => ({
+                pivots.sort((a, b) => a.time - b.time);
+                const recentPivots = pivots.slice(-3);
+                
+                const markers = recentPivots.map((p, idx) => ({
                     time: p.time,
                     position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                    color: '#6b7280',
+                    color: idx === 1 ? '#eab308' : '#22c55e',
                     shape: 'text',
-                    text: ['(i)', '(ii)', '(iii)', '(iv)', '(v)'][idx],
-                    size: 1
+                    text: ['(iii)', '(iv)', '(v)'][idx] || '(?)',
+                    size: 1.5
                 }));
-                
-                mainLine.setMarkers([...waveMarkers, ...subMarkers]);
+                mainLine.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
                 
-                // BOTTOM ZONEN
-                document.getElementById('currentPrice').textContent = '$' + formatPrice(price);
-                document.getElementById('zielZone').textContent = formatPrice(zielMin) + '-' + formatPrice(zielMax);
-                document.getElementById('erwartungsWert').textContent = formatPrice(erwartung);
-                document.getElementById('stopLoss').textContent = formatPrice(stop);
+                // UI
+                document.getElementById('currentPrice').textContent = formatPrice(price);
+                document.getElementById('handelsZone').textContent = formatPrice(zoneLow) + ' - ' + formatPrice(zoneHigh);
                 
             } catch (e) {
                 console.error(e);
