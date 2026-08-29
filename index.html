@@ -9,12 +9,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --border: #30363d;
-            --text: #e6edf3;
-            --text-muted: #8b949e;
+            --bg: #0a0b0f;
+            --card: #111218;
+            --border: #1f2129;
+            --text: #ffffff;
+            --text-muted: #6b7280;
             --green: #22c55e;
+            --green-dark: #16a34a;
             --green-bg: rgba(34, 197, 94, 0.2);
             --yellow: #eab308;
             --yellow-bg: rgba(234, 179, 8, 0.2);
@@ -121,7 +122,7 @@
             font-size: 0.9rem;
         }
         
-        #chart { height: 300px; }
+        #chart { height: 320px; }
         
         .summary-box {
             background: var(--card);
@@ -259,9 +260,7 @@
     </div>
     
     <div class="summary-box">
-        <div class="summary-text" id="summaryText">
-            Lade Analyse...
-        </div>
+        <div class="summary-text" id="summaryText">Lade Analyse...</div>
     </div>
     
     <div class="scenarios">
@@ -319,7 +318,7 @@
             const symbol = document.getElementById('symbol').value;
             
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=365`);
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=180`);
                 const data = await res.json();
                 
                 const candles = data.map(c => ({
@@ -334,33 +333,27 @@
                 const prevPrice = candles[candles.length - 2].close;
                 const change = ((price - prevPrice) / prevPrice * 100).toFixed(2);
                 
-                // Berechne Hoch/Tief der letzten 30 Tage
-                const last30 = candles.slice(-30);
-                const high30 = Math.max(...last30.map(c => c.high));
-                const low30 = Math.min(...last30.map(c => c.low));
-                
-                // Zielzonen
-                const zoneLow = price * 0.85;
-                const zoneHigh = price * 0.95;
-                const resistance = high30 * 1.02;
+                // Zielzone wie Schulz: ca. 46k-54k Bereich (für BTC Beispiel)
+                const zoneLow = price * 0.70;
+                const zoneHigh = price * 0.82;
                 
                 // Chart
                 if (chart) chart.remove();
                 chart = LightweightCharts.createChart(document.getElementById('chart'), {
                     layout: { 
-                        background: { color: '#161b22' }, 
-                        textColor: '#8b949e'
+                        background: { color: '#111218' }, 
+                        textColor: '#6b7280'
                     },
                     grid: { 
-                        vertLines: { color: 'rgba(48, 54, 61, 0.5)' }, 
-                        horzLines: { color: 'rgba(48, 54, 61, 0.5)' } 
+                        vertLines: { color: 'rgba(255,255,255,0.03)' }, 
+                        horzLines: { color: 'rgba(255,255,255,0.03)' } 
                     },
                     rightPriceScale: { 
-                        borderColor: '#30363d',
-                        scaleMargins: { top: 0.15, bottom: 0.15 }
+                        borderColor: '#1f2129',
+                        scaleMargins: { top: 0.1, bottom: 0.1 }
                     },
                     timeScale: { 
-                        borderColor: '#30363d',
+                        borderColor: '#1f2129',
                         timeVisible: false,
                         tickMarkFormatter: (time) => {
                             const date = new Date(time * 1000);
@@ -368,11 +361,10 @@
                             return months[date.getMonth()];
                         }
                     },
-                    height: 300,
-                    crosshair: { mode: 0 }
+                    height: 320
                 });
                 
-                // HAUPTLINIE (weiß)
+                // HAUPTLINIE
                 const mainLine = chart.addLineSeries({ 
                     color: '#e6edf3', 
                     lineWidth: 1.5,
@@ -385,104 +377,111 @@
                 const futureSteps = 60;
                 const futureTime = lastTime + (timeStep * futureSteps);
                 
-                // GRÜNE ZIELZONEN-BOX (gefüllter Bereich)
-                // Obere Linie
-                const boxTop = chart.addLineSeries({ 
+                // GRÜNE ZIELZONEN-BOX (wie Schulz Screenshot)
+                // Gefüllter Bereich zwischen zwei Linien
+                const zoneTopLine = chart.addLineSeries({ 
                     color: '#22c55e', 
                     lineWidth: 2,
                     lastValueVisible: true,
                     title: formatPrice(zoneHigh)
                 });
-                // Untere Linie
-                const boxBottom = chart.addLineSeries({ 
+                const zoneBottomLine = chart.addLineSeries({ 
                     color: '#22c55e', 
                     lineWidth: 2,
                     lastValueVisible: true,
                     title: formatPrice(zoneLow)
                 });
                 
-                boxTop.setData([
+                zoneTopLine.setData([
                     {time: lastTime, value: zoneHigh}, 
                     {time: futureTime, value: zoneHigh}
                 ]);
-                boxBottom.setData([
+                zoneBottomLine.setData([
                     {time: lastTime, value: zoneLow}, 
                     {time: futureTime, value: zoneLow}
                 ]);
                 
-                // GELBE PROGNOSE-LINIE (wahrscheinlichster Fall)
-                const forecastLine = chart.addLineSeries({ 
+                // GELBE GESTRICHELTE LINIEN für Prognose (wie Schulz)
+                // Obere gelbe Linie (Top Formation)
+                const yellowTop = chart.addLineSeries({ 
                     color: '#eab308', 
-                    lineWidth: 3,
-                    lineStyle: 0,
+                    lineWidth: 2,
+                    lineStyle: 2, // gestrichelt
+                    lastValueVisible: false
+                });
+                // Untere gelbe Linie (Ziel)
+                const yellowBottom = chart.addLineSeries({ 
+                    color: '#eab308', 
+                    lineWidth: 2,
+                    lineStyle: 2,
                     lastValueVisible: false
                 });
                 
-                const forecastData = [];
+                const topData = [];
+                const bottomData = [];
                 for (let i = 0; i <= futureSteps; i++) {
                     const t = lastTime + (timeStep * i);
                     const progress = i / futureSteps;
-                    // Abfall zur Zielzone
-                    const p = price - (price - ((zoneLow + zoneHigh) / 2)) * progress;
-                    forecastData.push({ time: t, value: p });
+                    // Abfall von aktuellem Preis zur Zielzone
+                    const topVal = price - (price - zoneHigh) * progress * 0.8;
+                    const bottomVal = price - (price - zoneLow) * progress;
+                    topData.push({ time: t, value: topVal });
+                    bottomData.push({ time: t, value: bottomVal });
                 }
-                forecastLine.setData(forecastData);
+                yellowTop.setData(topData);
+                yellowBottom.setData(bottomData);
                 
-                // WIDERSTANDS-LINIE (rot gestrichelt)
-                const resLine = chart.addLineSeries({ 
-                    color: 'rgba(239, 68, 68, 0.6)', 
-                    lineWidth: 1,
-                    lineStyle: 2,
-                    lastValueVisible: true,
-                    title: 'R: ' + formatPrice(resistance)
-                });
-                resLine.setData([
-                    {time: lastTime, value: resistance}, 
-                    {time: futureTime, value: resistance}
-                ]);
-                
-                // WELLEN-MARKER
+                // WELLEN LABELS (iv) und (v)
                 const pivots = [];
                 for (let i = 5; i < candles.length - 5; i++) {
                     const isHigh = candles.slice(i-5, i).every(d => d.high <= candles[i].high) &&
                                   candles.slice(i+1, i+6).every(d => d.high < candles[i].high);
                     const isLow = candles.slice(i-5, i).every(d => d.low >= candles[i].low) &&
                                  candles.slice(i+1, i+6).every(d => d.low > candles[i].low);
-                    if (isHigh) pivots.push({ time: candles[i].time, type: 'high' });
-                    if (isLow) pivots.push({ time: candles[i].time, type: 'low' });
+                    if (isHigh) pivots.push({ time: candles[i].time, price: candles[i].high, type: 'high' });
+                    if (isLow) pivots.push({ time: candles[i].time, price: candles[i].low, type: 'low' });
                 }
                 
                 pivots.sort((a, b) => a.time - b.time);
-                const markers = pivots.slice(-3).map((p, idx) => ({
-                    time: p.time,
-                    position: p.type === 'high' ? 'aboveBar' : 'belowBar',
-                    color: idx === 1 ? '#eab308' : '#22c55e',
-                    shape: 'text',
-                    text: ['(iii)', '(iv)', '(v)'][idx],
-                    size: 1.5
-                }));
+                const lastPivots = pivots.slice(-2);
+                
+                const markers = [
+                    {
+                        time: lastPivots[0]?.time || lastTime - timeStep * 10,
+                        position: 'aboveBar',
+                        color: '#eab308',
+                        shape: 'text',
+                        text: '(iv)',
+                        size: 1.5
+                    },
+                    {
+                        time: futureTime - timeStep * 5,
+                        position: 'belowBar',
+                        color: '#22c55e',
+                        shape: 'text',
+                        text: '(v)',
+                        size: 1.5
+                    }
+                ];
                 mainLine.setMarkers(markers);
                 
                 chart.timeScale().fitContent();
                 
-                // SUMMARY TEXT (wie Schulz)
+                // SUMMARY
                 const coinName = COINS[symbol];
-                const summaryHTML = `
+                document.getElementById('summaryText').innerHTML = `
                     <span class="summary-highlight">${coinName}</span> handelt aktuell um die 
-                    <span class="summary-highlight">${formatPrice(price)}</span>-Marke (${change > 0 ? '+' : ''}${change}%). 
-                    Die bullishe Dynamik lässt nach, das Handelsvolumen nimmt ab. 
-                    Verkaufssignale werden sichtbar. Widerstand bei 
-                    <span class="summary-highlight">${formatPrice(resistance)}</span> (grüne Linie). 
-                    Unvollendeter Abwärtstrend zur Zielzone ${formatPrice(zoneLow)}-${formatPrice(zoneHigh)} erwartet.
+                    <span class="summary-highlight">${formatPrice(price)}</span>-Marke. 
+                    Top-Bildung mit fallenden Kursen erwartet. Zielzone 
+                    <span class="summary-highlight">${formatPrice(zoneLow)}-${formatPrice(zoneHigh)}</span> 
+                    (Welle v) wird angestrebt.
                 `;
                 
-                document.getElementById('summaryText').innerHTML = summaryHTML;
-                document.getElementById('currentPrice').textContent = formatPrice(price) + ' (' + (change > 0 ? '+' : '') + change + '%)';
+                document.getElementById('currentPrice').textContent = formatPrice(price);
                 document.getElementById('handelsZone').textContent = formatPrice(zoneLow) + ' - ' + formatPrice(zoneHigh);
                 
             } catch (e) {
                 console.error(e);
-                document.getElementById('summaryText').textContent = 'Fehler beim Laden der Daten.';
             }
         }
         
